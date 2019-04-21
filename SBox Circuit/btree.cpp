@@ -1,113 +1,74 @@
 #include "btree.h"
 
-using namespace std;
-
-Btree::Btree() {
-	root = nullptr;
-}
-
-Btree::~Btree() {
-	DestroyTree();
-}
-
-void Btree::DestroyTree(TreeNode *leaf) {
-	if (leaf != nullptr) {
-		DestroyTree(leaf->GetLeft());
-		DestroyTree(leaf->GetRight());
-		delete leaf;
+TreeNode::TreeNode(size_t n) {
+	left = nullptr;
+	right = nullptr;
+	data.resize(n);
+	for (size_t i = 0; i < n; i++) {
+		data[i].resize(1 << n);
 	}
 }
 
-void Btree::AddNode(TreeNode *leaf, vector<vector<bool>> data, bool left){
-	if (!root) {
-		root = new TreeNode(data.size());
-		root->SetData(data);
-		root->SetLeft(nullptr);
-		root->SetRight(nullptr);
-		root->SetParent(nullptr);
-	} else if (left) {
-		TreeNode *tmp_node = new TreeNode(data.size());
-		tmp_node->SetData(data);
-		tmp_node->SetLeft(nullptr);
-		tmp_node->SetRight(nullptr);
-		tmp_node->SetParent(leaf);
-		leaf->SetLeft(tmp_node);
-	} else {
-		TreeNode *tmp_node = new TreeNode(data.size());
-		tmp_node->SetData(data);
-		tmp_node->SetLeft(nullptr);
-		tmp_node->SetRight(nullptr);
-		tmp_node->SetParent(leaf);
-		leaf->SetRight(tmp_node);
+void TreeNode::SetData(const std::vector<std::vector<bool>>& rhs) {
+	for (size_t i = 0; i < rhs.size(); i++) {
+		data[i] = rhs[i];
+
 	}
 }
 
-void Btree::DestroyTree() {
-	DestroyTree(root);
+void TreeNode::AddNode(const std::vector<std::vector<bool>>& data, bool is_left) {
+	std::unique_ptr<TreeNode> tmp_node(new TreeNode(data.size()));
+	tmp_node->SetData(data);
+	tmp_node->left = nullptr;
+	tmp_node->right = nullptr;
+	if (is_left) {
+		left = std::move(tmp_node);
+	}
+	else {
+		right = std::move(tmp_node);
+	}
 }
 
-void Btree::PostorderPrint() {
-	PostorderPrint(root);
-	std::cout << "\n";
-}
+void TreeNode::PostorderPrint(int indent) {
+	if (left != nullptr) {
+		left->PostorderPrint(indent + 4);
+	}
+	if (right != nullptr) {
+		right->PostorderPrint(indent + 4);
+	}
 
-void Btree::PostorderPrint(TreeNode *leaf, int indent) {
-	if (leaf != nullptr)
-	{
-		if (leaf->GetLeft())
-			PostorderPrint(leaf->GetLeft(), indent + 4);
-		if (leaf->GetRight())
-			PostorderPrint(leaf->GetRight(), indent + 4);
-
-		for (size_t i = 0; i < leaf->GetData().size(); i++) {
-			if (indent)	{
-				cout << setw(indent) << ' ';
-			}
-			cout << leaf->GetData()[i];
+	for (size_t i = 0; i < data.size(); i++) {
+		if (indent) {
+			std::cout << std::setw(indent) << ' ';
 		}
-		cout << endl;
+		std::cout << data[i];
 	}
+	std::cout << std::endl;
 }
 
-void Btree::BuildTree(const vector<vector<bool>>& input_data) {
-	if (!root)	{
-		root = new TreeNode(input_data.size());
-		root->SetData(input_data);
-		root->SetLeft(nullptr);
-		root->SetRight(nullptr);
-		root->SetParent(nullptr);
-		BuildTree(root);
-	} else {
-		root->SetData(input_data);
-		BuildTree(root);
-	}
-}
+void TreeNode::BuildTree() {
+	size_t size = data.size();
 
-void Btree::BuildTree(TreeNode *leaf) {
-	size_t size = leaf->GetData().size();
-
-	vector < vector<bool>> a(size), b(size), c(size);
+	std::vector < std::vector<bool>> a(size), b(size), c(size);
 	for (size_t i = 0; i < size; i++) {
 		a[i].resize(1 << size);
 		b[i].resize(1 << size);
 		c[i].resize(1 << size);
 	}
-	vector<bool> common(1 << size), diff1(1 << size), diff2(1 << size);
+	std::vector<bool> common(1 << size), diff1(1 << size), diff2(1 << size);
 
-	size_t flag = 0;
+	bool flag = false;
 	size_t place = 0;
 
-	for (size_t i = 0; i < size; i++)	{
-		a[i] = leaf->GetData()[i];
+	for (size_t i = 0; i < size; i++) {
+		a[i] = data[i];
 	}
 
-	for (size_t i = 0; i < size / 2; i++, place += 2)	{
+	for (size_t i = 0; i < size / 2; i++, place += 2) {
 		VectorPairInfo info = FindCommons(a);
-		vector<bool> &aa = a[info.num1], &bb = a[info.num2];
+		std::vector<bool> &aa = a[info.num1], &bb = a[info.num2];
 		if (info.common_ones == true) { // There are vectors with common ones
-			if (!flag)
-				flag = 1;
-
+			flag = true;
 			common = aa & bb;
 			diff1 = aa & ~common;
 			diff2 = bb & ~common;
@@ -115,17 +76,18 @@ void Btree::BuildTree(TreeNode *leaf) {
 			b[place] = diff1;
 			b[place + 1] = diff2;
 			c[place / 2] = common;
-		} else if (flag && info.num1 != info.num2) { // Otherwise all vectors are zero
+		}
+		else if (flag && info.num1 != info.num2) { // Otherwise all vectors are zero
 			b[place] = aa;
 			b[place + 1] = bb;
-			
-		} else {
+
+		}
+		else {
 			break;
 		}
-		fill(aa.begin(), aa.end(), false);
-		fill(bb.begin(), bb.end(), false);
+		std::fill(aa.begin(), aa.end(), false);
+		std::fill(bb.begin(), bb.end(), false);
 	}
-
 	if (flag) {
 		if (size & 1) {
 			size_t max_weight = 0, num = 0;
@@ -139,35 +101,53 @@ void Btree::BuildTree(TreeNode *leaf) {
 			if (max_weight > 0)
 				b[place] = a[num];
 		}
-		AddNode(leaf, b, true);
-		BuildTree(leaf->GetLeft());
-		AddNode(leaf, c, false);
-		BuildTree(leaf->GetRight());
+		AddNode(b, true);
+		left->BuildTree();
+		AddNode(c, false);
+		right->BuildTree();
 	}
+}
+
+size_t TreeNode::Complexity() {
+	size_t res = 0, n = data.size();
+
+	if (left == nullptr && right == nullptr) {
+		for (size_t i = 0; i < n; i++) {
+			if (HamWeight(data[i]) > 1)
+				res += (HamWeight(data[i]) - 1);
+		}
+		return res;
+	}
+	else {
+		res += left->Complexity();
+		res += right->Complexity();
+		for (size_t i = 0; i < n; i++) {
+			res += static_cast<size_t> (HamWeight(data[i]) > 0);
+		}
+		return res;
+	}
+}
+
+void Btree::PostorderPrint() {
+	if (root != nullptr) {
+		root->PostorderPrint();
+		std::cout << "\n";
+	}
+}
+
+void Btree::BuildTree(const std::vector<std::vector<bool>>& input_data) {
+	if (root == nullptr)	{
+		root = std::make_unique<TreeNode>(input_data.size());
+		root->left = nullptr;
+		root->right = nullptr;
+	} 
+	root->SetData(input_data);
+	root->BuildTree();
 }
 
 size_t Btree::Complexity() {
 	if (root)
-		return Complexity(root);
+		return root->Complexity();
 	else
 		return 0;
-}
-
-size_t Btree::Complexity(TreeNode *leaf) {
-	size_t res = 0, n = leaf->GetData().size();
-
-	if (leaf->GetLeft() == nullptr && leaf->GetRight() == nullptr) {
-		for (size_t i = 0; i < n; i++)	{
-			if (HamWeight(leaf->GetData()[i]) > 1)
-				res += (HamWeight(leaf->GetData()[i]) - 1);
-		}
-		return res;
-	} else {
-		res += Complexity(leaf->GetLeft());
-		res += Complexity(leaf->GetRight());
-		for (size_t i = 0; i < n; i++) {
-			res += static_cast<size_t> (HamWeight(leaf->GetData()[i]) > 0);
-		}
-		return res;
-	}
 }

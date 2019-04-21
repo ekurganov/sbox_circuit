@@ -5,7 +5,8 @@
 #include <string>
 
 namespace {
-	std::string def_input_path = "input.txt";
+	const std::string def_input_path = "input.txt";
+	const size_t max_print_threshold = 5;
 }
 
 template <typename T>

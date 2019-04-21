@@ -2,6 +2,7 @@
 
 #include "vector_bool.h"
 #include "btree.h"
+#include "profile.h"
 
 int main(int argc, char* argv[])
 {
@@ -17,13 +18,20 @@ int main(int argc, char* argv[])
 		}
 		std::vector<std::vector<bool>> input_data = ReadSBox(data_in);
 
-		for (size_t i = 0; i < input_data.size(); i++) {
-			std::cout << "input_data[" << i << "]" << std::endl;
-			std::cout << input_data[i] << std::endl;
+		if (input_data.size() <= max_print_threshold) {
+			for (size_t i = 0; i < input_data.size(); i++) {
+				std::cout << "input_data[" << i << "]" << std::endl;
+				std::cout << input_data[i] << std::endl;
+			}
 		}
 		Btree tree;
-		tree.BuildTree(input_data);
-		tree.PostorderPrint();
+		{
+			LOG_DURATION("Build tree");
+			tree.BuildTree(input_data);
+		}
+		if (input_data.size() <= max_print_threshold) {
+			tree.PostorderPrint();
+		}
 		std::cout << "Complexity = " << tree.Complexity() << std::endl;
 	}
 	catch (const std::exception& e) {
