@@ -70,7 +70,7 @@ VectorPairInfo FindCommons(const std::vector<std::vector<bool>>& arr){
 }
 
 vector<vector<bool>> ReadSBox(std::ifstream& in) {
-	size_t n, size = 0;
+	size_t n;
 	if (!(in >> n)) {
 		throw std::invalid_argument("Empty file");
 	}

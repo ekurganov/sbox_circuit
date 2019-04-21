@@ -6,7 +6,7 @@
 int main(int argc, char* argv[])
 {
 	try {
-		std::string input_path = (argc == 1) ? def_input_path : std::string(argv[2]);
+		std::string input_path = (argc == 1) ? def_input_path : std::string(argv[1]);
 		if (argc > 2) {
 			std::cout << "Usage: <exec name> <input file path>\n";
 			throw std::invalid_argument("Too lot arguments");
