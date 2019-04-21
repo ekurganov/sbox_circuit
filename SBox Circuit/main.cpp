@@ -3,23 +3,30 @@
 #include "vector_bool.h"
 #include "btree.h"
 
-using namespace std;
-
-int main()
+int main(int argc, char* argv[])
 {
-	size_t dim;
-	cin >> dim;
-	vector<vector<bool>> input_data(dim);
-	input_data = ReadSBox(dim);
+	try {
+		std::string input_path = (argc == 1) ? def_input_path : std::string(argv[2]);
+		if (argc > 2) {
+			std::cout << "Usage: <exec name> <input file path>\n";
+			throw std::invalid_argument("Too lot arguments");
+		}
+		std::ifstream data_in(input_path);
+		if (!data_in) {
+			throw std::runtime_error("Cannot open input file " + input_path);
+		}
+		std::vector<std::vector<bool>> input_data = ReadSBox(data_in);
 
-	for (size_t i = 0; i < input_data.size(); i++) {
-		cout << "input_data[" << i << "]" << endl;
-		cout << input_data[i] << endl;
+		for (size_t i = 0; i < input_data.size(); i++) {
+			std::cout << "input_data[" << i << "]" << std::endl;
+			std::cout << input_data[i] << std::endl;
+		}
+		Btree tree;
+		tree.BuildTree(input_data);
+		tree.PostorderPrint();
+		std::cout << "Complexity = " << tree.Complexity() << std::endl;
 	}
-
-	Btree tree;
-	tree.BuildTree(input_data);
-	tree.PostorderPrint();
-	cout << "Complexity = " << tree.Complexity() << endl;
-	return 0;
+	catch (const std::exception& e) {
+		std::cout << "Error: " << e.what() << std::endl;
+	}
 }

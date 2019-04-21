@@ -1,6 +1,6 @@
 #include "vector_bool.h"
 
-using namespace std;
+using std::vector;
 
 vector<bool> operator& (const vector<bool>& lhs, const vector<bool>& rhs) {
 	vector<bool> res;
@@ -69,15 +69,20 @@ VectorPairInfo FindCommons(const std::vector<std::vector<bool>>& arr){
 	return { false, 0, 0 };
 }
 
-vector<vector<bool>> ReadSBox(size_t n) {
+vector<vector<bool>> ReadSBox(std::ifstream& in) {
+	size_t n, size = 0;
+	if (!(in >> n)) {
+		throw std::invalid_argument("Empty file");
+	}
 	vector<vector<bool>> res(n);
 	for (size_t i = 0; i < n; i++) {
 		res[i].resize(1 << n);
 	}
 
-	for (size_t i = 0; i < static_cast<size_t> (1 << n); i++) {
-		size_t tmp;
-		cin >> tmp;
+	for (size_t tmp, i = 0; i < static_cast<size_t>(1 << n); i++) {
+		if (!(in >> tmp)) {
+			throw std::invalid_argument("Wrong number of S-Box elements");
+		}
 		for (size_t j = 0; j < n; j++) {
 			res[j][i] = static_cast<bool> ((tmp & (1 << j)) >> j);
 		}
