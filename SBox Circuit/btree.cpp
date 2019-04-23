@@ -12,7 +12,6 @@ TreeNode::TreeNode(size_t n) {
 void TreeNode::SetData(const std::vector<std::vector<bool>>& rhs) {
 	for (size_t i = 0; i < rhs.size(); i++) {
 		data[i] = rhs[i];
-
 	}
 }
 
@@ -48,59 +47,42 @@ void TreeNode::PostorderPrint(int indent) {
 
 void TreeNode::BuildTree() {
 	size_t size = data.size();
-
-	std::vector < std::vector<bool>> a(size), b(size), c(size);
+	std::vector<std::vector<bool>> a(size), b(size), c(size);
 	for (size_t i = 0; i < size; i++) {
 		a[i].resize(1 << size);
+		a[i] = data[i];
 		b[i].resize(1 << size);
 		c[i].resize(1 << size);
 	}
+
 	std::vector<bool> common(1 << size), diff1(1 << size), diff2(1 << size);
-
 	bool flag = false;
-	size_t place = 0;
 
-	for (size_t i = 0; i < size; i++) {
-		a[i] = data[i];
-	}
-
-	for (size_t i = 0; i < size / 2; i++, place += 2) {
+	for (size_t i = 0, place = 0; i < (size / 2) + (size & 1); i++, place += 2) {
 		VectorPairInfo info = FindCommons(a);
-		std::vector<bool> &aa = a[info.num1], &bb = a[info.num2];
-		if (info.common_ones == true) { // There are vectors with common ones
+		std::vector<bool> &vec1 = a[info.num1], &vec2 = a[info.num2];
+		if (info.common_ones > 0) {		// There are vectors with common ones
 			flag = true;
-			common = aa & bb;
-			diff1 = aa & ~common;
-			diff2 = bb & ~common;
-
+			common = vec1 & vec2;
+			diff1 = vec1 & ~common;
+			diff2 = vec2 & ~common;
 			b[place] = diff1;
 			b[place + 1] = diff2;
 			c[place / 2] = common;
 		}
-		else if (flag && info.num1 != info.num2) { // Otherwise all vectors are zero
-			b[place] = aa;
-			b[place + 1] = bb;
-
+		else if (flag && info.num1 != info.num2) {
+			b[place] = vec1;
+			if (place + 1 < size) { // if size = 2k
+				b[place + 1] = vec2;
+			}
 		}
-		else {
+		else {  // Both vectors are zero
 			break;
 		}
-		std::fill(aa.begin(), aa.end(), false);
-		std::fill(bb.begin(), bb.end(), false);
+		std::fill(vec1.begin(), vec1.end(), false);
+		std::fill(vec2.begin(), vec2.end(), false);
 	}
 	if (flag) {
-		if (size & 1) {
-			size_t max_weight = 0, num = 0;
-			for (size_t i = 0; i < a.size(); i++) {
-				size_t tmp = HamWeight(a[i]);
-				if (tmp > max_weight) {
-					max_weight = tmp;
-					num = i;
-				}
-			}
-			if (max_weight > 0)
-				b[place] = a[num];
-		}
 		AddNode(b, true);
 		left->BuildTree();
 		AddNode(c, false);
@@ -146,8 +128,10 @@ void Btree::BuildTree(const std::vector<std::vector<bool>>& input_data) {
 }
 
 size_t Btree::Complexity() {
-	if (root)
+	if (root != nullptr) {
 		return root->Complexity();
-	else
+	}
+	else {
 		return 0;
+	}
 }
