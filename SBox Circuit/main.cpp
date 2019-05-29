@@ -4,8 +4,12 @@
 #include "btree.h"
 #include "profile.h"
 
-int main(int argc, char* argv[])
-{
+namespace {
+	const std::string def_input_path = "input.txt";
+	const size_t max_print_threshold = 5;
+}
+
+int main(int argc, char* argv[]) {
 	try {
 		std::string input_path = (argc == 1) ? def_input_path : std::string(argv[1]);
 		if (argc > 2) {

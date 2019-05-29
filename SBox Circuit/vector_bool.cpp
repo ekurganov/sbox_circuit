@@ -2,7 +2,7 @@
 
 using std::vector;
 
-bool operator<(const VectorPairInfo lhs, const VectorPairInfo rhs) {
+bool operator<(const VectorPairInfo& lhs, const VectorPairInfo& rhs) {
 	if (lhs.common_ones != rhs.common_ones) {
 		return lhs.common_ones < rhs.common_ones;
 	}

@@ -4,10 +4,7 @@
 #include <fstream>
 #include <string>
 
-namespace {
-	const std::string def_input_path = "input.txt";
-	const size_t max_print_threshold = 5;
-}
+
 
 struct VectorPairInfo {
 	size_t common_ones;
@@ -15,7 +12,7 @@ struct VectorPairInfo {
 	size_t num2;
 };
 
-bool operator<(const VectorPairInfo lhs, const VectorPairInfo rhs);
+bool operator<(const VectorPairInfo& lhs, const VectorPairInfo& rhs);
 
 template <typename T>
 std::ostream& operator<<(std::ostream &stream, const std::vector<T>& v) {
