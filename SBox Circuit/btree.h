@@ -14,7 +14,7 @@ public:
 private:
 	void SetData(const std::vector<std::vector<bool>>& rhs);
 	void AddNode(const std::vector<std::vector<bool>>& data, bool left);
-	void BuildTree();
+	size_t BuildTree();
 	size_t Complexity();
 	size_t Depth(const size_t currDepth);
 	void PostorderPrint(int indent = 0);

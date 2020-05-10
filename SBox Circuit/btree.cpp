@@ -45,8 +45,8 @@ void TreeNode::PostorderPrint(int indent) {
 	std::cout << std::endl;
 }
 
-void TreeNode::BuildTree() {
-	size_t size = data.size();
+size_t TreeNode::BuildTree() {
+	size_t size = data.size(), res = 0;
 	std::vector<std::vector<bool>> a(size), b(size), c(size);
 	for (size_t i = 0; i < size; i++) {
 		a[i].resize(1 << size);
@@ -69,6 +69,7 @@ void TreeNode::BuildTree() {
 			b[place] = diff1;
 			b[place + 1] = diff2;
 			c[place / 2] = common;
+			res += 2;
 		}
 		else if (flag && info.num1 != info.num2) {
 			b[place] = vec1;
@@ -84,10 +85,19 @@ void TreeNode::BuildTree() {
 	}
 	if (flag) {
 		AddNode(b, true);
-		left->BuildTree();
+		res += left->BuildTree();
 		AddNode(c, false);
-		right->BuildTree();
+		res += right->BuildTree();
 	}
+	else
+	{
+		for (size_t i = 0; i < data.size(); ++i) {
+			if (HamWeight(data[i]) > 1) {
+				res += (HamWeight(data[i]) - 1);
+			}
+		}
+	}
+	return res;
 }
 
 size_t TreeNode::Complexity() {
@@ -133,7 +143,7 @@ void Btree::BuildTree(const std::vector<std::vector<bool>>& input_data) {
 		root->right = nullptr;
 	} 
 	root->SetData(input_data);
-	root->BuildTree();
+	std::cout << "Build Time Complexity = " << root->BuildTree() << std::endl;
 }
 
 size_t Btree::Complexity() {
