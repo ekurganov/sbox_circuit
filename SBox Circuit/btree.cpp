@@ -1,5 +1,7 @@
 #include "btree.h"
 
+#include <algorithm>
+
 TreeNode::TreeNode(size_t n) {
 	left = nullptr;
 	right = nullptr;
