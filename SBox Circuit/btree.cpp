@@ -110,6 +110,15 @@ size_t TreeNode::Complexity() {
 	}
 }
 
+size_t TreeNode::Depth(const size_t currDepth) {
+	if (left == nullptr && right == nullptr) {
+		return currDepth;
+	}
+	else {
+		return std::max(left->Depth(currDepth + 1), right->Depth(currDepth + 1));
+	}
+}
+
 void Btree::PostorderPrint() {
 	if (root != nullptr) {
 		root->PostorderPrint();
@@ -130,6 +139,15 @@ void Btree::BuildTree(const std::vector<std::vector<bool>>& input_data) {
 size_t Btree::Complexity() {
 	if (root != nullptr) {
 		return root->Complexity();
+	}
+	else {
+		return 0;
+	}
+}
+
+size_t Btree::Depth() {
+	if (root != nullptr) {
+		return root->Depth(0);
 	}
 	else {
 		return 0;

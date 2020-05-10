@@ -37,6 +37,7 @@ int main(int argc, char* argv[]) {
 			tree.PostorderPrint();
 		}
 		std::cout << "Complexity = " << tree.Complexity() << std::endl;
+		std::cout << "Depth = " << tree.Depth() << std::endl;
 	}
 	catch (const std::exception& e) {
 		std::cout << "Error: " << e.what() << std::endl;

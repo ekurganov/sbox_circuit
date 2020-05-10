@@ -16,6 +16,7 @@ private:
 	void AddNode(const std::vector<std::vector<bool>>& data, bool left);
 	void BuildTree();
 	size_t Complexity();
+	size_t Depth(const size_t currDepth);
 	void PostorderPrint(int indent = 0);
 
 	std::vector<std::vector<bool>> data;
@@ -29,6 +30,7 @@ public:
 	void PostorderPrint();
 	void BuildTree(const std::vector<std::vector<bool>>& input_data);
 	size_t Complexity();
+	size_t Depth();
 private:
 	std::unique_ptr<TreeNode> root;
 };
