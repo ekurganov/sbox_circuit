@@ -6,27 +6,26 @@
 #include <optional>
 #include <string_view>
 
-//using namespace std;
-//using namespace std::chrono;
 
-class LogDuration {
-public:
-	explicit LogDuration(const std::string& msg = "")
-		: message(msg + ": ")
-		, start(std::chrono::steady_clock::now())
+class LogDuration
+{
+  public:
+	  explicit LogDuration(const std::string& msg = "")
+		  : m_message(msg + ": ")
+		  , m_start(std::chrono::steady_clock::now())
+	  {}
+
+	~LogDuration() 
 	{
-	}
-
-	~LogDuration() {
 		auto finish = std::chrono::steady_clock::now();
-		auto dur = finish - start;
-		std::cerr << message
+		auto dur = finish - m_start;
+		std::cerr << m_message
 			<< std::chrono::duration_cast<std::chrono::milliseconds>(dur).count()
 			<< " ms" << std::endl;
 	}
 private:
-	std::string message;
-	std::chrono::steady_clock::time_point start;
+	std::string m_message;
+	std::chrono::steady_clock::time_point m_start;
 };
 
 #define UNIQ_ID_IMPL(lineno) _a_local_var_##lineno

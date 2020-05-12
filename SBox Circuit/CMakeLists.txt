@@ -1,8 +1,7 @@
-
 set(SOURCES
   main.cpp
-  btree.cpp
-  vector_bool.cpp
+  BTree.cpp
+  VectorBool.cpp
 )
 
 

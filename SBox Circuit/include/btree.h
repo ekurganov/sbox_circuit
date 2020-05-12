@@ -1,36 +1,40 @@
 #pragma once
+
 #include <vector>
 #include <iostream>
 #include <iomanip>
 #include <memory>
-#include "vector_bool.h"
+
+#include "VectorBool.h"
 
 class Btree;
 
-class TreeNode {
-public:
-	friend class Btree;
-	TreeNode(size_t n = 0);
-private:
-	void SetData(const std::vector<std::vector<bool>>& rhs);
-	void AddNode(const std::vector<std::vector<bool>>& data, bool left);
-	size_t BuildTree();
-	size_t Complexity();
-	size_t Depth(const size_t currDepth);
-	void PostorderPrint(int indent = 0);
+class TreeNode 
+{
+	public:
+		friend class Btree;
+		TreeNode(size_t n = 0);
+	private:
+		void setData(const std::vector<std::vector<bool>>& rhs);
+		void addNode(const std::vector<std::vector<bool>>& data, bool isLeft);
+		size_t buildTree();
+		size_t complexity();
+		size_t depth(const size_t currDepth);
+		void postorderPrint(int indent = 0);
 
-	std::vector<std::vector<bool>> data;
-	std::unique_ptr<TreeNode> left;
-	std::unique_ptr<TreeNode> right;
+		std::vector<std::vector<bool>> m_data;
+		std::unique_ptr<TreeNode> m_left;
+		std::unique_ptr<TreeNode> m_right;
 };
 
-class Btree {
-public:
-	Btree() : root(nullptr) {}
-	void PostorderPrint();
-	void BuildTree(const std::vector<std::vector<bool>>& input_data);
-	size_t Complexity();
-	size_t Depth();
-private:
-	std::unique_ptr<TreeNode> root;
+class Btree 
+{
+	public:
+		Btree() : m_root(nullptr) {}
+		void postorderPrint();
+		void buildTree(const std::vector<std::vector<bool>>& inputData);
+		size_t complexity();
+		size_t depth();
+	private:
+		std::unique_ptr<TreeNode> m_root;
 };

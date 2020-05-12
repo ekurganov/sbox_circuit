@@ -1,45 +1,56 @@
 ﻿#include <iostream>
 
-#include "vector_bool.h"
-#include "btree.h"
-#include "profile.h"
+#include "VectorBool.h"
+#include "BTree.h"
+#include "Profile.h"
 
-namespace {
-	const std::string def_input_path = "input.txt";
-	const size_t max_print_threshold = 5;
+namespace 
+{
+	const std::string defInputPath = "input.txt";
+	const size_t maxPrintThreshold = 5;
 }
 
-int main(int argc, char* argv[]) {
-	try {
-		std::string input_path = (argc == 1) ? def_input_path : std::string(argv[1]);
-		if (argc > 2) {
+int main(int argc, char* argv[]) 
+{
+	try 
+	{
+		std::string inputPath = (argc == 1) ? defInputPath : std::string(argv[1]);
+
+		if (argc > 2) 
+		{
 			std::cout << "Usage: <exec name> <input file path>\n";
 			throw std::invalid_argument("Too lot arguments");
 		}
-		std::ifstream data_in(input_path);
-		if (!data_in) {
-			throw std::runtime_error("Cannot open input file " + input_path);
-		}
-		std::vector<std::vector<bool>> input_data = ReadSBox(data_in);
 
-		if (input_data.size() <= max_print_threshold) {
-			for (size_t i = 0; i < input_data.size(); i++) {
-				std::cout << "input_data[" << i << "]" << std::endl;
-				std::cout << input_data[i] << std::endl;
+		std::ifstream dataIn(inputPath);
+		if (!dataIn)
+			throw std::runtime_error("Cannot open input file " + inputPath);
+
+		std::vector<std::vector<bool>> inputData = readSBox(dataIn);
+
+		if (inputData.size() <= maxPrintThreshold) 
+		{
+			for (size_t i = 0; i < inputData.size(); i++) 
+			{
+				std::cout << "inputData[" << i << "]" << std::endl;
+				std::cout << inputData[i] << std::endl;
 			}
 		}
+
 		Btree tree;
 		{
 			LOG_DURATION("Build tree");
-			tree.BuildTree(input_data);
+			tree.buildTree(inputData);
 		}
-		if (input_data.size() <= max_print_threshold) {
-			tree.PostorderPrint();
-		}
-		std::cout << "Complexity = " << tree.Complexity() << std::endl;
-		std::cout << "Depth = " << tree.Depth() << std::endl;
+
+		if (inputData.size() <= maxPrintThreshold)
+			tree.postorderPrint();
+
+		std::cout << "Complexity = " << tree.complexity() << std::endl;
+		std::cout << "Depth = " << tree.depth() << std::endl;
 	}
-	catch (const std::exception& e) {
+	catch (const std::exception& e) 
+	{
 		std::cout << "Error: " << e.what() << std::endl;
 	}
 }
