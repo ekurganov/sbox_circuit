@@ -18,11 +18,14 @@ class TreeNode
 		void setData(const std::vector<std::vector<bool>>& rhs);
 		void addNode(const std::vector<std::vector<bool>>& data, bool isLeft);
 		size_t buildTree();
-		size_t complexity();
+
+		size_t complexity(size_t i);
 		size_t depth(const size_t currDepth);
+
 		void postorderPrint(int indent = 0);
 
 		std::vector<std::vector<bool>> m_data;
+		std::vector<size_t> m_substitution;
 		std::unique_ptr<TreeNode> m_left;
 		std::unique_ptr<TreeNode> m_right;
 };

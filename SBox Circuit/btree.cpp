@@ -7,9 +7,13 @@ TreeNode::TreeNode(size_t n)
 	m_left = nullptr;
 	m_right = nullptr;
 	m_data.resize(n);
+	m_substitution.resize(n);
 
-	for (size_t i = 0; i < n; i++) 
+	for (size_t i = 0; i < n; i++)
+	{
 		m_data[i].resize(1 << n);
+		m_substitution[i] = n;
+	}
 }
 
 void TreeNode::setData(const std::vector<std::vector<bool>>& rhs) 
@@ -67,27 +71,43 @@ size_t TreeNode::buildTree()
 	{
 		VectorPairInfo info = findCommons(a);
 		std::vector<bool> &vec1 = a[info.num1], &vec2 = a[info.num2];
+
 		if (info.commonOnes > 0) // There are vectors with common ones
 		{		
-			flag = true;
 			common = vec1 & vec2;
 			diff1 = vec1 & ~common;
 			diff2 = vec2 & ~common;
+
 			b[place] = diff1;
 			b[place + 1] = diff2;
 			c[place / 2] = common;
+
+			m_substitution[place] = info.num1;
+			m_substitution[place + 1] = info.num2;
+
+			flag = true;
 			res += 2;
 		}
 		else if (flag && info.num1 != info.num2) 
 		{
 			b[place] = vec1;
-			if (place + 1 < size)   // if size = 2k
+			m_substitution[place] = info.num1;
+
+			if (place + 1 < size)  // if size = 2k
+			{
 				b[place + 1] = vec2;
+				m_substitution[place + 1] = info.num2;
+			}
 		}
 		else   // Both vectors are zero
 		{  
+			for (size_t i = 0; i < size; ++i)
+			{
+				m_substitution[i] = i;
+			}
 			break;
 		}
+
 		std::fill(vec1.begin(), vec1.end(), false);
 		std::fill(vec2.begin(), vec2.end(), false);
 	}
@@ -110,27 +130,36 @@ size_t TreeNode::buildTree()
 	return res;
 }
 
-size_t TreeNode::complexity() 
+size_t TreeNode::complexity(size_t num)
 {
 	size_t res = 0, n = m_data.size();
 
 	if (m_left == nullptr && m_right == nullptr) 
 	{
-		for (size_t i = 0; i < n; i++) 
-		{
-			if (hamWeight(m_data[i]) > 1)
-				res += (hamWeight(m_data[i]) - 1);
-		}
+		if (hamWeight(m_data[num]) > 1)
+			res += (hamWeight(m_data[num]) - 1);
 		return res;
 	}
 	else
 	{
-		res += m_left->complexity();
-		res += m_right->complexity();
+		size_t pos;
+		for (size_t i = 0; i < n; ++i)
+		{
+			if (m_substitution[i] == num)
+			{
+				pos = i;
+				break;
+			}
+		}
 
-		for (size_t i = 0; i < n; i++)
-			res += static_cast<size_t> (hamWeight(m_data[i]) > 0);
+		res = m_left->complexity(pos);
+		if ((pos & 1) == 0) 
+		{
+			res += m_right->complexity(pos / 2);
+		}
 
+		if (hamWeight(m_left->m_data[pos]) > 0 && hamWeight(m_right->m_data[pos / 2]) > 0)
+			res += 1;
 		return res;
 	}
 }
@@ -165,12 +194,21 @@ void Btree::buildTree(const std::vector<std::vector<bool>>& inputData)
 	std::cout << "Build Time Complexity = " << m_root->buildTree() << std::endl;
 }
 
-size_t Btree::complexity() 
+size_t Btree::complexity()
 {
-	if (m_root != nullptr) 
-		return m_root->complexity();
-	else 
+	if (m_root != nullptr)
+	{
+		size_t res = 0;
+		for (size_t i = 0; i < m_root->m_substitution.size(); ++i)
+		{
+			res += m_root->complexity(i);
+		}
+		return res;
+	}
+	else
+	{
 		return 0;
+  }
 }
 
 size_t Btree::depth() 
