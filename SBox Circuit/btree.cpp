@@ -166,10 +166,24 @@ size_t TreeNode::complexity(size_t num)
 
 size_t TreeNode::depth(const size_t currDepth) 
 {
-	if (m_left == nullptr && m_right == nullptr) 
-		return currDepth;
+	if (m_left == nullptr && m_right == nullptr)
+	{
+		size_t maxWt = 0;
+		for (const auto& vec : m_data)
+		{
+			size_t wt = hamWeight(vec);
+			if (wt > maxWt)
+				maxWt = wt;
+		}
+		if (maxWt > 0)
+			return currDepth + static_cast<size_t>(ceil(log2(maxWt)));
+		else
+			return currDepth;
+	}
 	else
+	{
 		return std::max(m_left->depth(currDepth + 1), m_right->depth(currDepth + 1));
+	}
 }
 
 void Btree::postorderPrint() 
