@@ -28,6 +28,7 @@ void TreeNode::addNode(const std::vector<std::vector<bool>>& data, bool isLeft)
 	tmpNode->setData(data);
 	tmpNode->m_left = nullptr;
 	tmpNode->m_right = nullptr;
+	tmpNode->m_leafNum = -1;
 
 	if (isLeft) 
 		m_left = std::move(tmpNode);
@@ -101,7 +102,7 @@ size_t TreeNode::buildTree()
 		}
 		else   // Both vectors are zero
 		{  
-			for (size_t i = 0; i < size; ++i)
+			for (size_t i = place; i < size; ++i)
 			{
 				m_substitution[i] = i;
 			}
@@ -164,6 +165,47 @@ size_t TreeNode::complexity(size_t num)
 	}
 }
 
+size_t TreeNode::handleLeafs(size_t currNum)
+{
+	size_t n = m_data.size();
+//	std::string res;
+
+	if (m_left == nullptr && m_right == nullptr) 
+	{
+		m_leafNum = currNum;
+
+		for (size_t i = 0; i < m_data.size(); ++i)
+		{
+			std::cout << "assign leafs[" << currNum << "][" << i << "] = ";
+
+			bool first = false;
+			for (size_t j = 0; j < m_data[i].size(); ++j)
+			{
+				if (m_data[i][j] == true)
+				{
+					if (first)
+						std::cout <<  " | ";
+					else
+						first = true;
+
+					std::cout << "conj[" + std::to_string(j) + "]";
+				}
+			}
+			if (!first)
+				std::cout << "1'b0";
+			std::cout << ";\n";
+		}
+		std::cout << std::endl;
+
+		return currNum + 1;
+	}
+	else
+	{
+		size_t num = m_left->handleLeafs(currNum);
+		return m_right->handleLeafs(num);
+	}
+}
+
 std::string TreeNode::printCircuit(size_t num)
 {
 	size_t n = m_data.size();
@@ -171,19 +213,33 @@ std::string TreeNode::printCircuit(size_t num)
 
 	if (m_left == nullptr && m_right == nullptr) 
 	{
-		bool first = false;
-		for (size_t i = 0; i < m_data[num].size(); ++i)
-		{
-			if (m_data[num][i] == true)
-			{
-				if (first)
-					res += " | ";
-				else
-					first = true;
 
-				res += "a[" + std::to_string(i) + "]";
-			}
-		}
+		//size_t pos;
+		//for (size_t i = 0; i < n; ++i)
+		//{
+		//	if (m_substitution[i] == num)
+		//	{
+		//		pos = i;
+		//		break;
+		//	}
+		//}
+
+		//bool first = false;
+		//res += "(";
+		//for (size_t i = 0; i < m_data[num].size(); ++i)
+		//{
+		//	if (m_data[num][i] == true)
+		//	{
+		//		if (first)
+		//			res += " | ";
+		//		else
+		//			first = true;
+
+		//		res += "a[" + std::to_string(i) + "]";
+		//	}
+		//}
+		//res += ")";
+		res += "leafs[" + std::to_string(m_leafNum) + "][" + std::to_string(num) + "]";
 		return res;
 	}
 	else
@@ -257,7 +313,9 @@ size_t Btree::complexity()
 		size_t res = 0;
 		for (size_t i = 0; i < m_root->m_substitution.size(); ++i)
 		{
-			res += m_root->complexity(i);
+			size_t tmp = m_root->complexity(i);
+			std::cout << "complexity " << i << " = " << tmp << std::endl;
+			res += tmp;
 		}
 		return res;
 	}
@@ -265,6 +323,14 @@ size_t Btree::complexity()
 	{
 		return 0;
   }
+}
+
+void Btree::handleLeafs()
+{
+	if (m_root != nullptr)
+		m_root->handleLeafs(0);
+	else
+		return;
 }
 
 std::string Btree::printCircuit()

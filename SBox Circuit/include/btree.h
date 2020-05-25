@@ -23,6 +23,7 @@ class TreeNode
 		size_t depth(const size_t currDepth);
 
 		std::string printCircuit(size_t num);
+		size_t handleLeafs(size_t currNum);
 
 		void postorderPrint(int indent = 0);
 
@@ -30,6 +31,7 @@ class TreeNode
 		std::vector<size_t> m_substitution;
 		std::unique_ptr<TreeNode> m_left;
 		std::unique_ptr<TreeNode> m_right;
+		int m_leafNum;
 };
 
 class Btree 
@@ -41,6 +43,7 @@ class Btree
 		size_t complexity();
 		size_t depth();
 		std::string printCircuit();
+		void handleLeafs();
 	private:
 		std::unique_ptr<TreeNode> m_root;
 };
