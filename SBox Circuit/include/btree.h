@@ -22,6 +22,8 @@ class TreeNode
 		size_t complexity(size_t i);
 		size_t depth(const size_t currDepth);
 
+		std::string printCircuit(size_t num);
+
 		void postorderPrint(int indent = 0);
 
 		std::vector<std::vector<bool>> m_data;
@@ -38,6 +40,7 @@ class Btree
 		void buildTree(const std::vector<std::vector<bool>>& inputData);
 		size_t complexity();
 		size_t depth();
+		std::string printCircuit();
 	private:
 		std::unique_ptr<TreeNode> m_root;
 };

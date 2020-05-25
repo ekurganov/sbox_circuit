@@ -48,6 +48,8 @@ int main(int argc, char* argv[])
 
 		std::cout << "Complexity = " << tree.complexity() << std::endl;
 		std::cout << "Depth = " << tree.depth() << std::endl;
+
+		std::cout << tree.printCircuit();
 	}
 	catch (const std::exception& e) 
 	{

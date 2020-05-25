@@ -164,6 +164,48 @@ size_t TreeNode::complexity(size_t num)
 	}
 }
 
+std::string TreeNode::printCircuit(size_t num)
+{
+	size_t n = m_data.size();
+	std::string res;
+
+	if (m_left == nullptr && m_right == nullptr) 
+	{
+		bool first = false;
+		for (size_t i = 0; i < m_data[num].size(); ++i)
+		{
+			if (m_data[num][i] == true)
+			{
+				if (first)
+					res += " | ";
+				else
+					first = true;
+
+				res += "a[" + std::to_string(i) + "]";
+			}
+		}
+		return res;
+	}
+	else
+	{
+		size_t pos;
+		for (size_t i = 0; i < n; ++i)
+		{
+			if (m_substitution[i] == num)
+			{
+				pos = i;
+				break;
+			}
+		}
+
+		res += m_left->printCircuit(pos) + " | " + m_right->printCircuit(pos / 2);
+
+//		if (hamWeight(m_left->m_data[pos]) > 0 && hamWeight(m_right->m_data[pos / 2]) > 0)
+//			res += 1;
+		return res;
+	}
+}
+
 size_t TreeNode::depth(const size_t currDepth) 
 {
 	if (m_left == nullptr && m_right == nullptr)
@@ -222,6 +264,23 @@ size_t Btree::complexity()
 	else
 	{
 		return 0;
+  }
+}
+
+std::string Btree::printCircuit()
+{
+	if (m_root != nullptr)
+	{
+		std::string res;
+		for (size_t i = 0; i < m_root->m_substitution.size(); ++i)
+		{
+			res += "assign z[" + std::to_string(i) + "] =  " + m_root->printCircuit(i) + ";\n";
+		}
+		return res;
+	}
+	else
+	{
+		return {};
   }
 }
 
