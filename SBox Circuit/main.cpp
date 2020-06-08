@@ -46,12 +46,10 @@ int main(int argc, char* argv[])
 		if (inputData.size() <= maxPrintThreshold)
 			tree.postorderPrint();
 
-		std::cout << "Complexity = " << tree.complexity() << std::endl;
+//		std::cout << "Complexity = " << tree.complexity() << std::endl;
 		std::cout << "Depth = " << tree.depth() << std::endl;
 
-		tree.handleLeafs();
-
-		std::cout << tree.printCircuit();
+		tree.printCircuit();
 	}
 	catch (const std::exception& e) 
 	{

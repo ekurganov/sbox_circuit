@@ -93,11 +93,13 @@ size_t TreeNode::buildTree()
 		{
 			b[place] = vec1;
 			m_substitution[place] = info.num1;
+			++place;
 
-			if (place + 1 < size)  // if size = 2k
+			if (place < size)  // if size = 2k
 			{
-				b[place + 1] = vec2;
-				m_substitution[place + 1] = info.num2;
+				b[place] = vec2;
+				m_substitution[place] = info.num2;
+				++place;
 			}
 		}
 		else   // Both vectors are zero
@@ -165,18 +167,35 @@ size_t TreeNode::complexity(size_t num)
 	}
 }
 
-size_t TreeNode::handleLeafs(size_t currNum)
+size_t getVectorsNum(std::vector<std::vector<bool>> vec)
 {
-	size_t n = m_data.size();
-//	std::string res;
-
-	if (m_left == nullptr && m_right == nullptr) 
+	size_t res = 0;
+	for (size_t i = 0; i < vec.size(); ++i)
 	{
+		size_t cnt = 0;
+		for (size_t j = 0; j < vec[i].size(); ++j)
+		{
+			if (vec[i][j] == true)
+				++cnt;
+		}
+		if (cnt > 0)
+			++res;
+	}
+	return res;
+}
+
+size_t TreeNode::printNodes(size_t vectorsNum, size_t currNum)
+{
+	if (m_left == nullptr && m_right == nullptr)
+	{
+		if (m_leafNum != -1)
+			return currNum;
+
 		m_leafNum = currNum;
 
 		for (size_t i = 0; i < m_data.size(); ++i)
 		{
-			std::cout << "assign leafs[" << currNum << "][" << i << "] = ";
+			std::cout << "assign nodes[" << currNum << "][" << i << "] = ";
 
 			bool first = false;
 			for (size_t j = 0; j < m_data[i].size(); ++j)
@@ -184,7 +203,7 @@ size_t TreeNode::handleLeafs(size_t currNum)
 				if (m_data[i][j] == true)
 				{
 					if (first)
-						std::cout <<  " | ";
+						std::cout << " | ";
 					else
 						first = true;
 
@@ -199,53 +218,55 @@ size_t TreeNode::handleLeafs(size_t currNum)
 
 		return currNum + 1;
 	}
-	else
+
+	size_t nodeNum = getVectorsNum(m_data);
+
+	if (nodeNum > vectorsNum)
 	{
-		size_t num = m_left->handleLeafs(currNum);
-		return m_right->handleLeafs(num);
+
+		size_t num = m_left->printNodes(vectorsNum, currNum);
+		return m_right->printNodes(vectorsNum, num);
 	}
+	else if (nodeNum == vectorsNum) // This is right child
+	{
+		m_leafNum = currNum;
+		for (size_t i = 0; i < vectorsNum; ++i)
+		{
+			size_t pos;
+			for (size_t j = 0; j < m_data.size(); ++j)
+			{
+				if (m_substitution[j] == i)
+				{
+					pos = j;
+					break;
+				}
+			}
+			std::cout << "assign nodes[" << currNum << "][" << i << "] = ";
+			m_left->printLeftSubtree(pos, vectorsNum);
+			if ((pos / 2 + 1) * 2 <= vectorsNum)
+				std::cout << " | nodes[" << m_right->m_leafNum << "][" << pos / 2 << "]";
+			std::cout << ";\n";
+		}
+		for (size_t i = vectorsNum; i < m_data.size(); ++i)
+			std::cout << "assign nodes[" << currNum << "][" << i << "] = 1'b0;\n";
+
+		std::cout << std::endl;
+		return currNum + 1;
+	}
+	else
+		throw std::runtime_error("ERROR in tree");
 }
 
-std::string TreeNode::printCircuit(size_t num)
+void TreeNode::printLeftSubtree(size_t num, size_t vectorsNum)
 {
-	size_t n = m_data.size();
-	std::string res;
-
-	if (m_left == nullptr && m_right == nullptr) 
+	if (m_left == nullptr && m_right == nullptr)
 	{
-
-		//size_t pos;
-		//for (size_t i = 0; i < n; ++i)
-		//{
-		//	if (m_substitution[i] == num)
-		//	{
-		//		pos = i;
-		//		break;
-		//	}
-		//}
-
-		//bool first = false;
-		//res += "(";
-		//for (size_t i = 0; i < m_data[num].size(); ++i)
-		//{
-		//	if (m_data[num][i] == true)
-		//	{
-		//		if (first)
-		//			res += " | ";
-		//		else
-		//			first = true;
-
-		//		res += "a[" + std::to_string(i) + "]";
-		//	}
-		//}
-		//res += ")";
-		res += "leafs[" + std::to_string(m_leafNum) + "][" + std::to_string(num) + "]";
-		return res;
+		std::cout << "nodes[" << m_leafNum << "][" << num << "]";
 	}
 	else
 	{
 		size_t pos;
-		for (size_t i = 0; i < n; ++i)
+		for (size_t i = 0; i < m_data.size(); ++i)
 		{
 			if (m_substitution[i] == num)
 			{
@@ -253,12 +274,9 @@ std::string TreeNode::printCircuit(size_t num)
 				break;
 			}
 		}
-
-		res += m_left->printCircuit(pos) + " | " + m_right->printCircuit(pos / 2);
-
-//		if (hamWeight(m_left->m_data[pos]) > 0 && hamWeight(m_right->m_data[pos / 2]) > 0)
-//			res += 1;
-		return res;
+		m_left->printLeftSubtree(pos, vectorsNum);
+		if ((pos / 2 + 1) * 2 <= vectorsNum)
+			std::cout << " | nodes[" << m_right->m_leafNum << "][" << pos / 2 << "]";
 	}
 }
 
@@ -325,29 +343,31 @@ size_t Btree::complexity()
   }
 }
 
-void Btree::handleLeafs()
-{
-	if (m_root != nullptr)
-		m_root->handleLeafs(0);
-	else
-		return;
-}
-
-std::string Btree::printCircuit()
+void Btree::printCircuit()
 {
 	if (m_root != nullptr)
 	{
-		std::string res;
-		for (size_t i = 0; i < m_root->m_substitution.size(); ++i)
+		size_t nodesNum = 0;
+		size_t n = m_root->m_data.size();
+		std::vector<size_t> vecSeq;
+		for (size_t i = n; i > 0; i >>= 1)
+			vecSeq.push_back(i);
+		std::reverse(vecSeq.begin(), vecSeq.end());
+
+		for (const auto num : vecSeq)
 		{
-			res += "assign z[" + std::to_string(i) + "] =  " + m_root->printCircuit(i) + ";\n";
+			nodesNum = m_root->printNodes(num, nodesNum);
 		}
-		return res;
+
+		std::cout << std::endl;
+
+		for (size_t i = 0; i < n; ++i)
+			std::cout << "assign z[" << i << "] = nodes[" << nodesNum - 1 << "][" << i << "];\n";
 	}
 	else
 	{
-		return {};
-  }
+		return;
+	}
 }
 
 size_t Btree::depth() 
