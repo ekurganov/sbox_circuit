@@ -213,16 +213,15 @@ size_t printBalanceCircuit(const std::vector<NodeParams>& inputVec, const size_t
     if (itVec.first < maxDepth)
     {
       size_t cnt = 0;
-      for (const auto& it : itVec.second)
+      for (size_t i = 0; i < itVec.second.size(); ++i)
       {
         if (!pairStarted)
         {
-          std::cout << "assign tmpWire[" << itVec.first + 1 << "][" << cnt << "] = " << it;
           pairStarted = true;
         }
         else
         {
-          std::cout << " | " << it << ";\n";
+          std::cout << "assign tmpWire[" << itVec.first + 1 << "][" << cnt << "] = " << itVec.second[i - 1] << " | " << itVec.second[i] << ";\n";
           pairStarted = false;
           workMap[itVec.first + 1].push_back("tmpWire[" + std::to_string(itVec.first + 1) + "][" + std::to_string(cnt) + "]");
           ++cnt;
@@ -230,8 +229,7 @@ size_t printBalanceCircuit(const std::vector<NodeParams>& inputVec, const size_t
       }
       if (pairStarted)
       {
-        std::cout << ";\n";
-        workMap[itVec.first + 1].push_back("tmpWire[" + std::to_string(itVec.first + 1) + "][" + std::to_string(cnt) + "]");
+        workMap[itVec.first + 1].push_back(itVec.second.back());
       }
     }
     else // last element, max depth
