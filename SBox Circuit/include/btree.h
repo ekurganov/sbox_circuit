@@ -9,6 +9,13 @@
 
 class Btree;
 
+struct NodeParams
+{
+	int num;
+	size_t index;
+	int depth;
+};
+
 class TreeNode 
 {
 	public:
@@ -24,13 +31,14 @@ class TreeNode
 
 		void postorderPrint(int indent = 0);
 		size_t printNodes( size_t vectorsNum, size_t currNum);
-		void printLeftSubtree(size_t num, size_t vectorsNum);
+		void getLeftSubtree(size_t num, size_t vectorsNum, std::vector<NodeParams>& paramsVec);
 
 		std::vector<std::vector<bool>> m_data;
 		std::vector<size_t> m_substitution;
 		std::unique_ptr<TreeNode> m_left;
 		std::unique_ptr<TreeNode> m_right;
 		int m_leafNum;
+		std::vector<int> m_depths;
 };
 
 class Btree 

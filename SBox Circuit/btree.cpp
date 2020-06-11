@@ -1,6 +1,7 @@
 #include "BTree.h"
 
 #include <algorithm>
+#include <map>
 
 TreeNode::TreeNode(size_t n) 
 {
@@ -8,6 +9,7 @@ TreeNode::TreeNode(size_t n)
 	m_right = nullptr;
 	m_data.resize(n);
 	m_substitution.resize(n);
+	m_depths.resize(n);
 
 	for (size_t i = 0; i < n; i++)
 	{
@@ -29,6 +31,8 @@ void TreeNode::addNode(const std::vector<std::vector<bool>>& data, bool isLeft)
 	tmpNode->m_left = nullptr;
 	tmpNode->m_right = nullptr;
 	tmpNode->m_leafNum = -1;
+	for (auto& it : m_depths)
+		it = -1;
 
 	if (isLeft) 
 		m_left = std::move(tmpNode);
@@ -184,6 +188,71 @@ size_t getVectorsNum(std::vector<std::vector<bool>> vec)
 	return res;
 }
 
+size_t printBalanceCircuit(const std::vector<NodeParams>& inputVec, const size_t num, const size_t ind)
+{
+  std::map<size_t, std::vector<std::string>> workMap;
+  size_t maxDepth = 0, totalDepth;
+  for (const auto& it : inputVec)
+  {
+    if (it.depth > maxDepth)
+      maxDepth = it.depth;
+
+    workMap[it.depth].push_back("nodes[" + std::to_string(it.num) + "][" + std::to_string(it.index) + "]");
+  }
+  
+  //for (const auto& itVec : workMap)
+  //{
+  //  for (const auto& it: itVec.second)
+  //    std::cout << "(" << it << ", " << itVec.first << ")\n";
+  //}
+  //std::cout << std::endl;
+
+  for (const auto& itVec : workMap)
+  {
+    bool pairStarted = false;
+    if (itVec.first < maxDepth)
+    {
+      size_t cnt = 0;
+      for (const auto& it : itVec.second)
+      {
+        if (!pairStarted)
+        {
+          std::cout << "assign tmpWire[" << itVec.first + 1 << "][" << cnt << "] = " << it;
+          pairStarted = true;
+        }
+        else
+        {
+          std::cout << " | " << it << ";\n";
+          pairStarted = false;
+          workMap[itVec.first + 1].push_back("tmpWire[" + std::to_string(itVec.first + 1) + "][" + std::to_string(cnt) + "]");
+          ++cnt;
+        }
+      }
+      if (pairStarted)
+      {
+        std::cout << ";\n";
+        workMap[itVec.first + 1].push_back("tmpWire[" + std::to_string(itVec.first + 1) + "][" + std::to_string(cnt) + "]");
+      }
+    }
+    else // last element, max depth
+    {
+      std::cout << "assign nodes[" << num << "][" << ind << "] = ";
+      for (const auto& it : itVec.second)
+      {
+        if (!pairStarted)
+          pairStarted = true;
+        else
+          std::cout << " | ";
+        std::cout << it;        
+      }
+      std::cout << "; \n";
+			totalDepth = itVec.first + static_cast<size_t>(ceil(log2(itVec.second.size())));
+      std::cout << "// Total depth = " << totalDepth << std::endl;
+    }
+  }
+	return totalDepth;
+}
+
 size_t TreeNode::printNodes(size_t vectorsNum, size_t currNum)
 {
 	if (m_left == nullptr && m_right == nullptr)
@@ -195,6 +264,7 @@ size_t TreeNode::printNodes(size_t vectorsNum, size_t currNum)
 
 		for (size_t i = 0; i < m_data.size(); ++i)
 		{
+			m_depths[i] = static_cast<int>(ceil(log2(hamWeight(m_data[i]))));
 			std::cout << "assign nodes[" << currNum << "][" << i << "] = ";
 
 			bool first = false;
@@ -223,13 +293,13 @@ size_t TreeNode::printNodes(size_t vectorsNum, size_t currNum)
 
 	if (nodeNum > vectorsNum)
 	{
-
 		size_t num = m_left->printNodes(vectorsNum, currNum);
 		return m_right->printNodes(vectorsNum, num);
 	}
 	else if (nodeNum == vectorsNum) // This is right child
 	{
 		m_leafNum = currNum;
+
 		for (size_t i = 0; i < vectorsNum; ++i)
 		{
 			size_t pos;
@@ -241,11 +311,14 @@ size_t TreeNode::printNodes(size_t vectorsNum, size_t currNum)
 					break;
 				}
 			}
-			std::cout << "assign nodes[" << currNum << "][" << i << "] = ";
-			m_left->printLeftSubtree(pos, vectorsNum);
+//			std::cout << "assign nodes[" << currNum << "][" << i << "] = ";
+			std::vector<NodeParams> paramsVec;
+			m_left->getLeftSubtree(pos, vectorsNum, paramsVec);
 			if (pos + static_cast<size_t>((pos & 1) == 0) < vectorsNum)
-				std::cout << " | nodes[" << m_right->m_leafNum << "][" << pos / 2 << "]";
-			std::cout << ";\n";
+				//std::cout << " | nodes[" << m_right->m_leafNum << "][" << pos / 2 << "]";
+				paramsVec.push_back({m_right->m_leafNum, pos / 2, m_right->m_depths[pos / 2]});
+//			std::cout << ";\n";
+			m_depths[i] = printBalanceCircuit(paramsVec, currNum, i);
 		}
 		for (size_t i = vectorsNum; i < m_data.size(); ++i)
 			std::cout << "assign nodes[" << currNum << "][" << i << "] = 1'b0;\n";
@@ -257,11 +330,12 @@ size_t TreeNode::printNodes(size_t vectorsNum, size_t currNum)
 		throw std::runtime_error("ERROR in tree");
 }
 
-void TreeNode::printLeftSubtree(size_t num, size_t vectorsNum)
+void TreeNode::getLeftSubtree(size_t num, size_t vectorsNum, std::vector<NodeParams>& paramsVec)
 {
 	if (m_left == nullptr && m_right == nullptr)
 	{
-		std::cout << "nodes[" << m_leafNum << "][" << num << "]";
+		paramsVec.push_back({m_leafNum, num, m_depths[num]});
+//		std::cout << "nodes[" << m_leafNum << "][" << num << "]";
 	}
 	else
 	{
@@ -274,9 +348,10 @@ void TreeNode::printLeftSubtree(size_t num, size_t vectorsNum)
 				break;
 			}
 		}
-		m_left->printLeftSubtree(pos, vectorsNum);
+		m_left->getLeftSubtree(pos, vectorsNum, paramsVec);
 		if (pos + static_cast<size_t>((pos & 1) == 0) < vectorsNum)
-			std::cout << " | nodes[" << m_right->m_leafNum << "][" << pos / 2 << "]";
+			paramsVec.push_back({m_right->m_leafNum, pos / 2, m_right->m_depths[pos / 2]});
+//			std::cout << " | nodes[" << m_right->m_leafNum << "][" << pos / 2 << "]";
 	}
 }
 
@@ -356,7 +431,7 @@ void Btree::printCircuit()
 
 		for (const auto num : vecSeq)
 		{
-			std::cout << "-------- " << num << " --------\n";
+			std::cout << "//-------- " << num << " --------\n";
 			nodesNum = m_root->printNodes(num, nodesNum);
 			//std::cout << "-------- " << num << " --------\n";
 		}
