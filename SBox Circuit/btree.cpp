@@ -207,7 +207,7 @@ size_t TreeNode::printNodes(size_t vectorsNum, size_t currNum)
 					else
 						first = true;
 
-					std::cout << "conj[" + std::to_string(j) + "]";
+					std::cout << "conj[" << j << "]";
 				}
 			}
 			if (!first)
@@ -243,7 +243,7 @@ size_t TreeNode::printNodes(size_t vectorsNum, size_t currNum)
 			}
 			std::cout << "assign nodes[" << currNum << "][" << i << "] = ";
 			m_left->printLeftSubtree(pos, vectorsNum);
-			if ((pos / 2 + 1) * 2 <= vectorsNum)
+			if (pos + static_cast<size_t>((pos & 1) == 0) < vectorsNum)
 				std::cout << " | nodes[" << m_right->m_leafNum << "][" << pos / 2 << "]";
 			std::cout << ";\n";
 		}
@@ -275,7 +275,7 @@ void TreeNode::printLeftSubtree(size_t num, size_t vectorsNum)
 			}
 		}
 		m_left->printLeftSubtree(pos, vectorsNum);
-		if ((pos / 2 + 1) * 2 <= vectorsNum)
+		if (pos + static_cast<size_t>((pos & 1) == 0) < vectorsNum)
 			std::cout << " | nodes[" << m_right->m_leafNum << "][" << pos / 2 << "]";
 	}
 }
@@ -356,7 +356,9 @@ void Btree::printCircuit()
 
 		for (const auto num : vecSeq)
 		{
+			std::cout << "-------- " << num << " --------\n";
 			nodesNum = m_root->printNodes(num, nodesNum);
+			//std::cout << "-------- " << num << " --------\n";
 		}
 
 		std::cout << std::endl;
