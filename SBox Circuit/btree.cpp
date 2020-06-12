@@ -221,9 +221,9 @@ size_t printBalanceCircuit(const std::vector<NodeParams>& inputVec, const size_t
         }
         else
         {
-          std::cout << "assign tmpWire[" << itVec.first + 1 << "][" << cnt << "] = " << itVec.second[i - 1] << " | " << itVec.second[i] << ";\n";
+          std::cout << "assign tmpWire" << num * 100 + ind << "[" << itVec.first + 1 << "][" << cnt << "] = " << itVec.second[i - 1] << " | " << itVec.second[i] << ";\n";
           pairStarted = false;
-          workMap[itVec.first + 1].push_back("tmpWire[" + std::to_string(itVec.first + 1) + "][" + std::to_string(cnt) + "]");
+          workMap[itVec.first + 1].push_back("tmpWire" + std::to_string(num * 100 + ind) + "[" + std::to_string(itVec.first + 1) + "][" + std::to_string(cnt) + "]");
           ++cnt;
         }
       }
@@ -315,7 +315,13 @@ size_t TreeNode::printNodes(size_t vectorsNum, size_t currNum)
 			if (pos + static_cast<size_t>((pos & 1) == 0) < vectorsNum)
 				//std::cout << " | nodes[" << m_right->m_leafNum << "][" << pos / 2 << "]";
 				paramsVec.push_back({m_right->m_leafNum, pos / 2, m_right->m_depths[pos / 2]});
+
+			size_t tmpMaxDepth = 0;
+			for (const auto& it : paramsVec)
+				if (it.depth > tmpMaxDepth)
+					tmpMaxDepth = it.depth;
 //			std::cout << ";\n";
+			std::cout << "wire [" << (m_data.size() - 1) << ":0] tmpWire" << currNum * 100 + i << " [" << tmpMaxDepth << ":0];\n";
 			m_depths[i] = printBalanceCircuit(paramsVec, currNum, i);
 		}
 		for (size_t i = vectorsNum; i < m_data.size(); ++i)
