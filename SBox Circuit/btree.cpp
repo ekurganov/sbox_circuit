@@ -97,13 +97,13 @@ size_t TreeNode::buildTree()
 		{
 			b[place] = vec1;
 			m_substitution[place] = info.num1;
-			++place;
+//			++place;
 
-			if (place < size)  // if size = 2k
+			if (place + 1 < size)  // if size = 2k
 			{
-				b[place] = vec2;
-				m_substitution[place] = info.num2;
-				++place;
+				b[place + 1] = vec2;
+				m_substitution[place + 1] = info.num2;
+//				++place;
 			}
 		}
 		else   // Both vectors are zero
@@ -262,7 +262,8 @@ size_t TreeNode::printNodes(size_t vectorsNum, size_t currNum)
 
 		for (size_t i = 0; i < m_data.size(); ++i)
 		{
-			m_depths[i] = static_cast<int>(ceil(log2(hamWeight(m_data[i]))));
+			if (hamWeight(m_data[i]) > 0)
+				m_depths[i] = static_cast<int>(ceil(log2(hamWeight(m_data[i]))));
 			std::cout << "assign nodes[" << currNum << "][" << i << "] = ";
 
 			bool first = false;
@@ -314,15 +315,20 @@ size_t TreeNode::printNodes(size_t vectorsNum, size_t currNum)
 			m_left->getLeftSubtree(pos, vectorsNum, paramsVec);
 			if (pos + static_cast<size_t>((pos & 1) == 0) < vectorsNum)
 				//std::cout << " | nodes[" << m_right->m_leafNum << "][" << pos / 2 << "]";
+			{
 				paramsVec.push_back({m_right->m_leafNum, pos / 2, m_right->m_depths[pos / 2]});
+			}
 
 			size_t tmpMaxDepth = 0;
 			for (const auto& it : paramsVec)
 				if (it.depth > tmpMaxDepth)
 					tmpMaxDepth = it.depth;
 //			std::cout << ";\n";
-			std::cout << "wire [" << (m_data.size() - 1) << ":0] tmpWire" << currNum * 100 + i << " [" << tmpMaxDepth << ":0];\n";
-			m_depths[i] = printBalanceCircuit(paramsVec, currNum, i);
+			if (!m_data.empty())
+			{
+				std::cout << "wire [" << (m_data.size() - 1) << ":0] tmpWire" << currNum * 100 + i << " [" << tmpMaxDepth << ":0];\n";
+				m_depths[i] = printBalanceCircuit(paramsVec, currNum, i);
+			}
 		}
 		for (size_t i = vectorsNum; i < m_data.size(); ++i)
 			std::cout << "assign nodes[" << currNum << "][" << i << "] = 1'b0;\n";
@@ -354,7 +360,9 @@ void TreeNode::getLeftSubtree(size_t num, size_t vectorsNum, std::vector<NodePar
 		}
 		m_left->getLeftSubtree(pos, vectorsNum, paramsVec);
 		if (pos + static_cast<size_t>((pos & 1) == 0) < vectorsNum)
+		{
 			paramsVec.push_back({m_right->m_leafNum, pos / 2, m_right->m_depths[pos / 2]});
+		}
 //			std::cout << " | nodes[" << m_right->m_leafNum << "][" << pos / 2 << "]";
 	}
 }
