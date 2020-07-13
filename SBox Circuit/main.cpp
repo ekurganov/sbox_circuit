@@ -3,6 +3,7 @@
 #include "VectorBool.h"
 #include "BTree.h"
 #include "Profile.h"
+#include "Args.h"
 
 namespace 
 {
@@ -14,42 +15,40 @@ int main(int argc, char* argv[])
 {
 	try 
 	{
-		std::string inputPath = (argc == 1) ? defInputPath : std::string(argv[1]);
+		Args args;
+		args.readOpts(argc, argv);
 
-		if (argc > 2) 
-		{
-			std::cout << "Usage: <exec name> <input file path>\n";
-			throw std::invalid_argument("Too lot arguments");
-		}
-
-		std::ifstream dataIn(inputPath);
+		std::ifstream dataIn(args.inputPath_);
 		if (!dataIn)
-			throw std::runtime_error("Cannot open input file " + inputPath);
+			throw std::runtime_error("Cannot open input file " + args.inputPath_);
 
-		std::vector<std::vector<bool>> inputData = readSBox(dataIn);
-
-		if (inputData.size() <= maxPrintThreshold) 
+		if (args.meth_ == mNewMeth)
 		{
-			for (size_t i = 0; i < inputData.size(); i++) 
-			{
-				std::cout << "inputData[" << i << "]" << std::endl;
-				std::cout << inputData[i] << std::endl;
-			}
+      std::vector<std::vector<bool>> inputData = readSBox(dataIn);
+
+      if (inputData.size() <= maxPrintThreshold)
+      {
+        for (size_t i = 0; i < inputData.size(); i++)
+        {
+          std::cout << "inputData[" << i << "]" << std::endl;
+          std::cout << inputData[i] << std::endl;
+        }
+      }
+
+      Btree tree;
+      {
+        LOG_DURATION("Build tree");
+        tree.buildTree(inputData);
+      }
+
+      if (inputData.size() <= maxPrintThreshold)
+        tree.postorderPrint();
+
+  //		std::cout << "Complexity = " << tree.complexity() << std::endl;
+      std::cout << "Depth = " << tree.depth() << std::endl;
+
+      tree.printCircuit();
 		}
-
-		Btree tree;
-		{
-			LOG_DURATION("Build tree");
-			tree.buildTree(inputData);
-		}
-
-		if (inputData.size() <= maxPrintThreshold)
-			tree.postorderPrint();
-
-//		std::cout << "Complexity = " << tree.complexity() << std::endl;
-		std::cout << "Depth = " << tree.depth() << std::endl;
-
-		tree.printCircuit();
 	}
 	catch (const std::exception& e) 
 	{
