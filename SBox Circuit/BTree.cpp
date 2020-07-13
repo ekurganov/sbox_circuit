@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <map>
+#include <cmath>
 
 TreeNode::TreeNode(size_t n) 
 {
@@ -10,6 +11,7 @@ TreeNode::TreeNode(size_t n)
 	m_data.resize(n);
 	m_substitution.resize(n);
 	m_depths.resize(n);
+	m_leafNum = -1;
 
 	for (size_t i = 0; i < n; i++)
 	{
