@@ -28,6 +28,7 @@ class TreeNode
 
 		size_t complexity(size_t i);
 		size_t depth(const size_t currDepth);
+		size_t size(size_t incSize);
 
 		void postorderPrint(int indent = 0);
 		size_t printNodes(std::ostream& os, size_t vectorsNum, size_t currNum);
@@ -50,6 +51,7 @@ class Btree
 		size_t complexity();
 		size_t depth();
 		void printCircuit(std::ostream& os);
+		const size_t size() const;
 	private:
 		std::unique_ptr<TreeNode> m_root;
 };

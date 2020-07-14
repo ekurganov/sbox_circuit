@@ -342,6 +342,14 @@ size_t TreeNode::printNodes(std::ostream& os, size_t vectorsNum, size_t currNum)
 		throw std::runtime_error("ERROR in tree");
 }
 
+size_t TreeNode::size(size_t incSize)
+{
+  if (m_left == nullptr && m_right == nullptr)
+    return incSize + 1;
+  else
+    return m_left->size(incSize) + m_right->size(incSize) + 1;
+}
+
 void TreeNode::getLeftSubtree(size_t num, size_t vectorsNum, std::vector<NodeParams>& paramsVec)
 {
 	if (m_left == nullptr && m_right == nullptr)
@@ -467,4 +475,12 @@ size_t Btree::depth()
 		return m_root->depth(0);
 	else
 		return 0;
+}
+
+const size_t Btree::size() const
+{
+  if (m_root != nullptr)
+    return m_root->size(0);
+  else
+    return 0;
 }
