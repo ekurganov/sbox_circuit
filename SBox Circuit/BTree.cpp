@@ -99,13 +99,11 @@ size_t TreeNode::buildTree()
 		{
 			b[place] = vec1;
 			m_substitution[place] = info.num1;
-//			++place;
 
 			if (place + 1 < size)  // if size = 2k
 			{
 				b[place + 1] = vec2;
 				m_substitution[place + 1] = info.num2;
-//				++place;
 			}
 		}
 		else   // Both vectors are zero
@@ -201,13 +199,6 @@ size_t printBalanceCircuit(std::ostream& os, const std::vector<NodeParams>& inpu
 
     workMap[it.depth].push_back("nodes[" + std::to_string(it.num) + "][" + std::to_string(it.index) + "]");
   }
-  
-  //for (const auto& itVec : workMap)
-  //{
-  //  for (const auto& it: itVec.second)
-  //    std::cout << "(" << it << ", " << itVec.first << ")\n";
-  //}
-  //std::cout << std::endl;
 
   for (const auto& itVec : workMap)
   {
@@ -312,11 +303,9 @@ size_t TreeNode::printNodes(std::ostream& os, size_t vectorsNum, size_t currNum)
 					break;
 				}
 			}
-//			std::cout << "assign nodes[" << currNum << "][" << i << "] = ";
 			std::vector<NodeParams> paramsVec;
 			m_left->getLeftSubtree(pos, vectorsNum, paramsVec);
 			if (pos + static_cast<size_t>((pos & 1) == 0) < vectorsNum)
-				//std::cout << " | nodes[" << m_right->m_leafNum << "][" << pos / 2 << "]";
 			{
 				paramsVec.push_back({m_right->m_leafNum, pos / 2, m_right->m_depths[pos / 2]});
 			}
@@ -325,7 +314,6 @@ size_t TreeNode::printNodes(std::ostream& os, size_t vectorsNum, size_t currNum)
 			for (const auto& it : paramsVec)
 				if (it.depth > tmpMaxDepth)
 					tmpMaxDepth = it.depth;
-//			std::cout << ";\n";
 			if (!m_data.empty())
 			{
 				os << "  wire [" << (m_data.size() - 1) << ":0] tmpWire" << currNum * 100 + i << " [" << tmpMaxDepth << ":0];\n";
@@ -355,7 +343,6 @@ void TreeNode::getLeftSubtree(size_t num, size_t vectorsNum, std::vector<NodePar
 	if (m_left == nullptr && m_right == nullptr)
 	{
 		paramsVec.push_back({m_leafNum, num, m_depths[num]});
-//		std::cout << "nodes[" << m_leafNum << "][" << num << "]";
 	}
 	else
 	{
@@ -373,7 +360,6 @@ void TreeNode::getLeftSubtree(size_t num, size_t vectorsNum, std::vector<NodePar
 		{
 			paramsVec.push_back({m_right->m_leafNum, pos / 2, m_right->m_depths[pos / 2]});
 		}
-//			std::cout << " | nodes[" << m_right->m_leafNum << "][" << pos / 2 << "]";
 	}
 }
 
@@ -456,7 +442,7 @@ void Btree::printCircuit(std::ostream& os)
 		os << "  " << "input [" << (n - 1) << ":0] a;\n";
 		os << "  " << "output [" << (n - 1) << ":0] z;\n";
 		os << "  " << "wire [" << ((1 << n) - 1) << ":0] conj;\n";
-		os << "  " << "wire [" << (n - 1) << ":0] nodes[" << 50 << ":0];\n\n";
+		os << "  " << "wire [" << (n - 1) << ":0] nodes[" << (size() - 1) << ":0];\n\n";
 
 		os << "  " << "decoder" << n << "_" << (1 << n) << " d_inst(.a(a), .z(conj));\n\n";
 
@@ -464,7 +450,6 @@ void Btree::printCircuit(std::ostream& os)
 		{
 			os << "  //-------- " << num << " --------\n";
 			nodesNum = m_root->printNodes(os, num, nodesNum);
-			//std::cout << "-------- " << num << " --------\n";
 		}
 
 		os << std::endl;
