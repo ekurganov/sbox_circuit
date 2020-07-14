@@ -22,6 +22,20 @@ int main(int argc, char* argv[])
 		if (!dataIn)
 			throw std::runtime_error("Cannot open input file " + args.inputPath_);
 
+		std::streambuf* buf;
+		std::ofstream of;
+
+		if (!args.outputPath_.empty())
+		{
+		  of.open(args.outputPath_);
+		  buf = of.rdbuf();
+		}
+		else
+		{
+		  buf = std::cout.rdbuf();
+		}
+		std::ostream out(buf);
+
 		if (args.meth_ == mNewMeth)
 		{
       std::vector<std::vector<bool>> inputData = readSBox(dataIn);
@@ -47,7 +61,7 @@ int main(int argc, char* argv[])
   //		std::cout << "Complexity = " << tree.complexity() << std::endl;
       std::cout << "Depth = " << tree.depth() << std::endl;
 
-      tree.printCircuit();
+      tree.printCircuit(out);
 		}
 	}
 	catch (const std::exception& e) 

@@ -30,7 +30,7 @@ class TreeNode
 		size_t depth(const size_t currDepth);
 
 		void postorderPrint(int indent = 0);
-		size_t printNodes( size_t vectorsNum, size_t currNum);
+		size_t printNodes(std::ostream& os, size_t vectorsNum, size_t currNum);
 		void getLeftSubtree(size_t num, size_t vectorsNum, std::vector<NodeParams>& paramsVec);
 
 		std::vector<std::vector<bool>> m_data;
@@ -49,7 +49,7 @@ class Btree
 		void buildTree(const std::vector<std::vector<bool>>& inputData);
 		size_t complexity();
 		size_t depth();
-		void printCircuit();
+		void printCircuit(std::ostream& os);
 	private:
 		std::unique_ptr<TreeNode> m_root;
 };
