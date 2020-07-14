@@ -32,5 +32,6 @@ size_t hamWeight(const std::vector<bool>& v);
 VectorPairInfo commonsOnesNum(const std::vector<bool>& lhs, const std::vector<bool>& rhs);
 VectorPairInfo findCommons(const std::vector<std::vector<bool>> &arr);
 
-std::vector<std::vector<bool>> readSBox(std::ifstream& in);
+std::vector<std::vector<bool>> readSBox2d(std::ifstream& in);
+std::vector<uint16_t> readSBox1d(std::ifstream& in);
 

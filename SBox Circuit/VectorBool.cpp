@@ -99,7 +99,7 @@ VectorPairInfo findCommons(const vector<vector<bool>>& arr)
 	return { ans.commonOnes, ni, nj };
 }
 
-vector<vector<bool>> readSBox(std::ifstream& in) 
+vector<vector<bool>> readSBox2d(std::ifstream& in)
 {
 	size_t n;
 
@@ -121,4 +121,22 @@ vector<vector<bool>> readSBox(std::ifstream& in)
 	}
 
 	return res;
+}
+
+std::vector<uint16_t> readSBox1d(std::ifstream& in)
+{
+  size_t n;
+
+  if (!(in >> n))
+    throw std::invalid_argument("Empty file");
+
+  std::vector<uint16_t> res(1 << n);
+
+  for (size_t i = 0; i < static_cast<size_t>(1 << n); ++i)
+  {
+    if (!(in >> res[i]))
+      throw std::invalid_argument("Wrong number of S-Box elements");
+  }
+
+  return res;
 }

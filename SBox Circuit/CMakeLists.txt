@@ -4,6 +4,7 @@ set(SOURCES
   main.cpp
   BTree.cpp
   VectorBool.cpp
+  SimpleMethods.cpp
 )
 
 

@@ -4,6 +4,7 @@
 #include "BTree.h"
 #include "Profile.h"
 #include "Args.h"
+#include "SimpleMethods.h"
 
 namespace 
 {
@@ -38,7 +39,7 @@ int main(int argc, char* argv[])
 
 		if (args.meth_ == mNewMeth)
 		{
-      std::vector<std::vector<bool>> inputData = readSBox(dataIn);
+      std::vector<std::vector<bool>> inputData = readSBox2d(dataIn);
 
       if (inputData.size() <= maxPrintThreshold)
       {
@@ -62,6 +63,18 @@ int main(int argc, char* argv[])
       std::cout << "Depth = " << tree.depth() << std::endl;
 
       tree.printCircuit(out);
+		}
+		else if (args.meth_ != mMinDNF)
+		{
+		  std::vector<uint16_t> inputData = readSBox1d(dataIn);
+		  if (args.meth_ == mSimple)
+		  {
+		    printSboxCircuitSimple(inputData, out);
+		  }
+		  else if (args.meth_ == mUpgSimple)
+		  {
+		    printSboxCircuitUpgSimple(inputData, out);
+		  }
 		}
 	}
 	catch (const std::exception& e) 
