@@ -4,6 +4,25 @@
 #include <map>
 #include <cmath>
 
+
+size_t getVectorsNum(const std::vector<std::vector<bool>>& vec)
+{
+  size_t res = 0;
+  for (size_t i = 0; i < vec.size(); ++i)
+  {
+    size_t cnt = 0;
+    for (size_t j = 0; j < vec[i].size(); ++j)
+    {
+      if (vec[i][j] == true)
+        ++cnt;
+    }
+    if (cnt > 0)
+      ++res;
+  }
+  return res;
+}
+
+
 TreeNode::TreeNode(size_t n) 
 {
 	m_left = nullptr;
@@ -171,23 +190,6 @@ size_t TreeNode::complexity(size_t num)
 	}
 }
 
-size_t getVectorsNum(std::vector<std::vector<bool>> vec)
-{
-	size_t res = 0;
-	for (size_t i = 0; i < vec.size(); ++i)
-	{
-		size_t cnt = 0;
-		for (size_t j = 0; j < vec[i].size(); ++j)
-		{
-			if (vec[i][j] == true)
-				++cnt;
-		}
-		if (cnt > 0)
-			++res;
-	}
-	return res;
-}
-
 size_t printBalanceCircuit(std::ostream& os, const std::vector<NodeParams>& inputVec, const size_t num, const size_t ind)
 {
   std::map<size_t, std::vector<std::string>> workMap;
@@ -288,7 +290,7 @@ size_t TreeNode::printNodes(std::ostream& os, size_t vectorsNum, size_t currNum)
 		size_t num = m_left->printNodes(os, vectorsNum, currNum);
 		return m_right->printNodes(os, vectorsNum, num);
 	}
-	else if (nodeNum == vectorsNum) // This is right child
+	else // Right child
 	{
 		m_leafNum = currNum;
 
@@ -328,8 +330,6 @@ size_t TreeNode::printNodes(std::ostream& os, size_t vectorsNum, size_t currNum)
 		os << std::endl;
 		return currNum + 1;
 	}
-	else
-		throw std::runtime_error("ERROR in tree");
 }
 
 size_t TreeNode::size(size_t incSize)
