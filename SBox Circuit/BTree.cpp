@@ -168,7 +168,7 @@ size_t TreeNode::complexity(size_t num)
 	}
 	else
 	{
-		size_t pos;
+		size_t pos = 0;
 		for (size_t i = 0; i < n; ++i)
 		{
 			if (m_substitution[i] == num)
@@ -193,10 +193,10 @@ size_t TreeNode::complexity(size_t num)
 size_t printBalanceCircuit(std::ostream& os, const std::vector<NodeParams>& inputVec, const size_t num, const size_t ind)
 {
   std::map<size_t, std::vector<std::string>> workMap;
-  size_t maxDepth = 0, totalDepth;
+  size_t maxDepth = 0, totalDepth = 0;
   for (const auto& it : inputVec)
   {
-    if (it.depth > maxDepth)
+    if (it.depth > static_cast<int>(maxDepth))
       maxDepth = it.depth;
 
     workMap[it.depth].push_back("nodes[" + std::to_string(it.num) + "][" + std::to_string(it.index) + "]");
@@ -296,7 +296,7 @@ size_t TreeNode::printNodes(std::ostream& os, size_t vectorsNum, size_t currNum)
 
 		for (size_t i = 0; i < vectorsNum; ++i)
 		{
-			size_t pos;
+			size_t pos = 0;
 			for (size_t j = 0; j < m_data.size(); ++j)
 			{
 				if (m_substitution[j] == i)
@@ -315,7 +315,7 @@ size_t TreeNode::printNodes(std::ostream& os, size_t vectorsNum, size_t currNum)
 
 			size_t tmpMaxDepth = 0;
 			for (const auto& it : paramsVec)
-				if (it.depth > tmpMaxDepth)
+				if (it.depth > static_cast<int>(tmpMaxDepth))
 					tmpMaxDepth = it.depth;
 
 			if (!m_data.empty())
@@ -348,7 +348,7 @@ void TreeNode::getLeftSubtree(size_t num, size_t vectorsNum, std::vector<NodePar
 	}
 	else
 	{
-		size_t pos;
+		size_t pos = 0;
 		for (size_t i = 0; i < m_data.size(); ++i)
 		{
 			if (m_substitution[i] == num)
