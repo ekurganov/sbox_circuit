@@ -307,13 +307,15 @@ size_t TreeNode::printNodes(std::ostream& os, size_t vectorsNum, size_t currNum)
 			m_left->getLeftSubtree(pos, vectorsNum, paramsVec);
 			if (pos + static_cast<size_t>((pos & 1) == 0) < vectorsNum)
 			{
-				paramsVec.push_back({m_right->m_leafNum, pos / 2, m_right->m_depths[pos / 2]});
+			  if (hamWeight(m_right->m_data[pos/2]) > 0)
+			    paramsVec.push_back({m_right->m_leafNum, pos / 2, m_right->m_depths[pos / 2]});
 			}
 
 			size_t tmpMaxDepth = 0;
 			for (const auto& it : paramsVec)
 				if (it.depth > tmpMaxDepth)
 					tmpMaxDepth = it.depth;
+
 			if (!m_data.empty())
 			{
 				os << "  wire [" << (m_data.size() - 1) << ":0] tmpWire" << currNum * 100 + i << " [" << tmpMaxDepth << ":0];\n";
@@ -358,7 +360,8 @@ void TreeNode::getLeftSubtree(size_t num, size_t vectorsNum, std::vector<NodePar
 		m_left->getLeftSubtree(pos, vectorsNum, paramsVec);
 		if (pos + static_cast<size_t>((pos & 1) == 0) < vectorsNum)
 		{
-			paramsVec.push_back({m_right->m_leafNum, pos / 2, m_right->m_depths[pos / 2]});
+		  if (hamWeight(m_right->m_data[pos/2]) > 0)
+		    paramsVec.push_back({m_right->m_leafNum, pos / 2, m_right->m_depths[pos / 2]});
 		}
 	}
 }
