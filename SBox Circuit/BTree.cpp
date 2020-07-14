@@ -223,7 +223,7 @@ size_t printBalanceCircuit(std::ostream& os, const std::vector<NodeParams>& inpu
         }
         else
         {
-          os << "assign tmpWire" << num * 100 + ind << "[" << itVec.first + 1 << "][" << cnt << "] = " << itVec.second[i - 1] << " | " << itVec.second[i] << ";\n";
+          os << "  assign tmpWire" << num * 100 + ind << "[" << itVec.first + 1 << "][" << cnt << "] = " << itVec.second[i - 1] << " | " << itVec.second[i] << ";\n";
           pairStarted = false;
           workMap[itVec.first + 1].push_back("tmpWire" + std::to_string(num * 100 + ind) + "[" + std::to_string(itVec.first + 1) + "][" + std::to_string(cnt) + "]");
           ++cnt;
@@ -236,7 +236,7 @@ size_t printBalanceCircuit(std::ostream& os, const std::vector<NodeParams>& inpu
     }
     else // last element, max depth
     {
-      os << "assign nodes[" << num << "][" << ind << "] = ";
+      os << "  assign nodes[" << num << "][" << ind << "] = ";
       for (const auto& it : itVec.second)
       {
         if (!pairStarted)
@@ -247,7 +247,7 @@ size_t printBalanceCircuit(std::ostream& os, const std::vector<NodeParams>& inpu
       }
       os << "; \n";
 			totalDepth = itVec.first + static_cast<size_t>(ceil(log2(itVec.second.size())));
-      os << "// Total depth = " << totalDepth << std::endl;
+      os << "  // Total depth = " << totalDepth << std::endl;
     }
   }
 	return totalDepth;
@@ -266,7 +266,7 @@ size_t TreeNode::printNodes(std::ostream& os, size_t vectorsNum, size_t currNum)
 		{
 			if (hamWeight(m_data[i]) > 0)
 				m_depths[i] = static_cast<int>(ceil(log2(hamWeight(m_data[i]))));
-			os << "assign nodes[" << currNum << "][" << i << "] = ";
+			os << "  assign nodes[" << currNum << "][" << i << "] = ";
 
 			bool first = false;
 			for (size_t j = 0; j < m_data[i].size(); ++j)
@@ -328,12 +328,12 @@ size_t TreeNode::printNodes(std::ostream& os, size_t vectorsNum, size_t currNum)
 //			std::cout << ";\n";
 			if (!m_data.empty())
 			{
-				os << "wire [" << (m_data.size() - 1) << ":0] tmpWire" << currNum * 100 + i << " [" << tmpMaxDepth << ":0];\n";
+				os << "  wire [" << (m_data.size() - 1) << ":0] tmpWire" << currNum * 100 + i << " [" << tmpMaxDepth << ":0];\n";
 				m_depths[i] = printBalanceCircuit(os, paramsVec, currNum, i);
 			}
 		}
 		for (size_t i = vectorsNum; i < m_data.size(); ++i)
-			os << "assign nodes[" << currNum << "][" << i << "] = 1'b0;\n";
+			os << "  assign nodes[" << currNum << "][" << i << "] = 1'b0;\n";
 
 		os << std::endl;
 		return currNum + 1;
@@ -446,14 +446,23 @@ void Btree::printCircuit(std::ostream& os)
 	{
 		size_t nodesNum = 0;
 		size_t n = m_root->m_data.size();
+
 		std::vector<size_t> vecSeq;
 		for (size_t i = n; i > 0; i >>= 1)
 			vecSeq.push_back(i);
 		std::reverse(vecSeq.begin(), vecSeq.end());
 
+		os << "module sbox" << n << "(a, z);\n";
+		os << "  " << "input [" << (n - 1) << ":0] a;\n";
+		os << "  " << "output [" << (n - 1) << ":0] z;\n";
+		os << "  " << "wire [" << ((1 << n) - 1) << ":0] conj;\n";
+		os << "  " << "wire [" << (n - 1) << ":0] nodes[" << 50 << ":0];\n\n";
+
+		os << "  " << "decoder" << n << "_" << (1 << n) << " d_inst(.a(a), .z(conj));\n\n";
+
 		for (const auto num : vecSeq)
 		{
-			os << "//-------- " << num << " --------\n";
+			os << "  //-------- " << num << " --------\n";
 			nodesNum = m_root->printNodes(os, num, nodesNum);
 			//std::cout << "-------- " << num << " --------\n";
 		}
@@ -461,7 +470,8 @@ void Btree::printCircuit(std::ostream& os)
 		os << std::endl;
 
 		for (size_t i = 0; i < n; ++i)
-			os << "assign z[" << i << "] = nodes[" << nodesNum - 1 << "][" << i << "];\n";
+			os << "  assign z[" << i << "] = nodes[" << nodesNum - 1 << "][" << i << "];\n";
+		os << "endmodule\n";
 	}
 	else
 	{
