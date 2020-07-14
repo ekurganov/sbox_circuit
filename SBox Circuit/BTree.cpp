@@ -108,9 +108,9 @@ size_t TreeNode::buildTree()
 		}
 		else   // Both vectors are zero
 		{  
-			for (size_t i = place; i < size; ++i)
+			for (size_t j = place; j < size; ++j)
 			{
-				m_substitution[i] = i;
+				m_substitution[j] = j;
 			}
 			break;
 		}
