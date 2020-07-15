@@ -75,6 +75,10 @@ int main(int argc, char* argv[])
 		  {
 		    printSboxCircuitUpgSimple(inputData, out);
 		  }
+		  else if (args.meth_ == mShannon)
+		  {
+		    printSboxCircuitShannon(inputData, out);
+		  }
 		}
 	}
 	catch (const std::exception& e) 

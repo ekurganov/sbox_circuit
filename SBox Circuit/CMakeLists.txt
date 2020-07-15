@@ -5,6 +5,7 @@ set(SOURCES
   BTree.cpp
   VectorBool.cpp
   SimpleMethods.cpp
+  ShannonMethod.cpp
 )
 
 
