@@ -1,3 +1,6 @@
+`ifndef __DECODERS_V_
+`define __DECODERS_V_
+
 module decoder2_4(a, z);
 	input [1:0] a;
 	output [3:0] z;
@@ -161,3 +164,4 @@ module decoder11_2048(a, z);
   end
 endmodule
 
+`endif 
