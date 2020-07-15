@@ -79,6 +79,10 @@ int main(int argc, char* argv[])
 		  {
 		    printSboxCircuitShannon(inputData, out);
 		  }
+		  else if (args.meth_ == mLupanov)
+		  {
+		    printSboxCircuitLupanov(inputData, out);
+		  }
 		}
 	}
 	catch (const std::exception& e) 

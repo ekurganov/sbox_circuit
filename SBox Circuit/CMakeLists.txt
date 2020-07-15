@@ -6,6 +6,7 @@ set(SOURCES
   VectorBool.cpp
   SimpleMethods.cpp
   ShannonMethod.cpp
+  LupanovMethod.cpp
 )
 
 
