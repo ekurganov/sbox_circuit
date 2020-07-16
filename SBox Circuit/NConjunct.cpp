@@ -20,22 +20,6 @@ void NConjunct::clear()
     m_mainValues[i] = false;
 }
 
-void NConjunct::negateValue(size_t num)
-{
-  m_mainValues[2 * num] = false;
-  m_mainValues[2 * num + 1] = true;
-}
-
-void NConjunct::printMainValues() const
-{
-  for (size_t i = 0; i < m_mainValues.size(); i += 2)
-    std::cout << m_mainValues[i] << ' ';
-  std::cout << std::endl;
-  for (size_t i = 1; i < m_mainValues.size(); i += 2)
-    std::cout << m_mainValues[i] << ' ';
-  std::cout << std::endl;
-}
-
 const bool NConjunct::containsConj(const NConjunct& rhs) const
 {
   for (size_t i = 0; i < rhs.m_mainValues.size(); ++i)
@@ -216,4 +200,9 @@ const bool NConjunct::mainValue(const size_t index, const bool val) const
     --intIndex;
 
   return m_mainValues[intIndex];
+}
+
+const std::vector<std::pair<size_t, size_t> >& NConjunct::precompiledConjs() const
+{
+  return m_precompiledConjs;
 }

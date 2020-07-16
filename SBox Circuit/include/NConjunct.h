@@ -5,8 +5,6 @@ class NConjunct
   public:
     NConjunct(size_t n);
     void clear();
-    void negateValue(size_t num);
-    void printMainValues() const;
     const bool containsConj(const NConjunct& rhs) const;
     void eraseConj(const NConjunct& rhs);
     void constructValue(size_t number, size_t shiftNum);
@@ -22,10 +20,9 @@ class NConjunct
 
     const size_t dim() const;
     const bool mainValue(const size_t index, const bool val) const;
+    const std::vector<std::pair<size_t, size_t>>& precompiledConjs() const;
 
-
-
-//  private:
+  private:
     size_t m_dim;
     size_t m_balancedWireNum;
     std::vector<bool> m_mainValues;

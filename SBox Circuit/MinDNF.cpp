@@ -67,7 +67,7 @@ void printBalanceCircuit(std::ostream& os, std::map<size_t, std::vector<std::str
   }
 }
 
-std::vector<std::vector<NConjunct>> readEspressoFile(std::ifstream& is)
+std::vector<std::vector<NConjunct>> readEspressoFile(std::ifstream& is, size_t& maxEls)
 {
   std::string line;
   std::vector<std::string> strVec;
@@ -98,12 +98,15 @@ std::vector<std::vector<NConjunct>> readEspressoFile(std::ifstream& is)
   }
 
   std::vector<std::vector<NConjunct>> res(dim);
+  maxEls = 0;
+
   for (size_t i = 3; i < strVec.size() - 1; ++i)
   {
     NConjunct nc(dim);
     std::string& str = strVec[i];
     size_t currPos = 0;
     bool outputFlag = false;
+    size_t elemNum = 0;
     for (size_t cnt = 0; cnt < str.length(); ++cnt)
     {
       char c = str[cnt];
@@ -111,8 +114,9 @@ std::vector<std::vector<NConjunct>> readEspressoFile(std::ifstream& is)
       {
         if (!outputFlag)
         {
-          nc.m_mainValues[currPos * 2] = true;
+          nc.setMainValue(currPos, true);
           ++currPos;
+          ++elemNum;
         }
         else
         {
@@ -124,9 +128,10 @@ std::vector<std::vector<NConjunct>> readEspressoFile(std::ifstream& is)
       {
         if (!outputFlag)
         {
-          nc.m_mainValues[currPos * 2 + 1] = true;
+          nc.setMainValue(currPos, false);
         }
         ++currPos;
+        ++elemNum;
       }
       else if (str[cnt] == '-')
       {
@@ -139,6 +144,10 @@ std::vector<std::vector<NConjunct>> readEspressoFile(std::ifstream& is)
           throw std::runtime_error("Wrong inputs number");
         outputFlag = true;
         currPos = 0;
+
+        if (elemNum > maxEls)
+          maxEls = elemNum;
+        elemNum = 0;
       }
       else
       {
@@ -153,32 +162,9 @@ std::vector<std::vector<NConjunct>> readEspressoFile(std::ifstream& is)
 void printSboxCircuitMinDNF(std::ifstream& is, std::ostream& os)
 {
 
-  std::vector<std::vector<NConjunct>> values = readEspressoFile(is);
-  size_t dim = values.size();
-
   size_t maxElements = 0;
-  size_t mcnt = 0;
-  for (const auto& outIt : values)
-  {
-    for (const auto inIt : outIt)
-    {
-      size_t elemNum = 0;
-      for (size_t i = 0; i < inIt.m_dim; ++i)
-      {
-        if (inIt.m_mainValues[i * 2 + 1] == true || inIt.m_mainValues[i * 2] == true)
-          ++elemNum;
-      }
-      if (elemNum > maxElements)
-      {
-        maxElements = elemNum;
-        mcnt = 1;
-      }
-      else if (elemNum == maxElements)
-      {
-        mcnt++;
-      }
-    }
-  }
+  std::vector<std::vector<NConjunct>> values = readEspressoFile(is, maxElements);
+  size_t dim = values.size();
 
   size_t startDigitsNum = (1 << (static_cast<size_t>(ceil(log2(maxElements))))) >> 1;
 
@@ -205,7 +191,7 @@ void printSboxCircuitMinDNF(std::ifstream& is, std::ostream& os)
               {
                 NConjunct checkConj = commonConjuncts[i][j];
                 checkConj.eraseConj(nc);
-                checkConj.m_precompiledConjs.push_back({ic, commonWireNum});
+                checkConj.addPrecompiledConj({ic, commonWireNum});
                 if (commonConjuncts[i][j].depth() == checkConj.depth())
                 {
                   ++cnt;
@@ -222,7 +208,7 @@ void printSboxCircuitMinDNF(std::ifstream& is, std::ostream& os)
               {
                 NConjunct checkConj = values[i][j];
                 checkConj.eraseConj(nc);
-                checkConj.m_precompiledConjs.push_back({ic, commonWireNum});
+                checkConj.addPrecompiledConj({ic, commonWireNum});
                 if (values[i][j].depth() == checkConj.depth())
                 {
                   ++cnt;
@@ -236,12 +222,12 @@ void printSboxCircuitMinDNF(std::ifstream& is, std::ostream& os)
             for (const auto& it : helpIndices)
             {
               commonConjuncts[it.first][it.second].eraseConj(nc);
-              commonConjuncts[it.first][it.second].m_precompiledConjs.push_back({ic, commonWireNum});
+              commonConjuncts[it.first][it.second].addPrecompiledConj({ic, commonWireNum});
             }
             for (const auto& it : outputIndices)
             {
               values[it.first][it.second].eraseConj(nc);
-              values[it.first][it.second].m_precompiledConjs.push_back({ic, commonWireNum});
+              values[it.first][it.second].addPrecompiledConj({ic, commonWireNum});
             }
             commonConjuncts[ic].push_back(nc);
             ++commonWireNum;
@@ -267,7 +253,7 @@ void printSboxCircuitMinDNF(std::ifstream& is, std::ostream& os)
       for (size_t i = 0; i < it.second.size(); ++i)
       {
         size_t tmpMaxDepth = 0;
-        for (const auto& el : it.second[i].m_precompiledConjs)
+        for (const auto& el : it.second[i].precompiledConjs())
         {
           if (el.first > tmpMaxDepth)
             tmpMaxDepth = el.first;
@@ -283,18 +269,18 @@ void printSboxCircuitMinDNF(std::ifstream& is, std::ostream& os)
         else
         {
           std::map<size_t, std::vector<std::string>> inputEls;
-          for (size_t j = 0; j < it.second[i].m_dim; ++j)
+          for (size_t j = 0; j < it.second[i].dim(); ++j)
           {
-            if (it.second[i].m_mainValues[j * 2 + 1] == true)
+            if (it.second[i].mainValue(j, false) == true)
               inputEls[0].push_back("~a[" + std::to_string(j) + "]");
-            else if (it.second[i].m_mainValues[j * 2] == true)
+            else if (it.second[i].mainValue(j, true) == true)
               inputEls[0].push_back("a[" + std::to_string(j) + "]");
           }
-          for (const auto& el : it.second[i].m_precompiledConjs)
+          for (const auto& el : it.second[i].precompiledConjs())
           {
             inputEls[el.first].push_back("commonWire" + std::to_string(el.first) + "[" + std::to_string(el.second) + "]");
           }
-          os << "wire [" << (it.second[i].m_dim - 1) << ":0] tmpWire" << tmpWireNum << "[" << (it.second[i].depth()) << ":0];\n";
+          os << "wire [" << (it.second[i].dim() - 1) << ":0] tmpWire" << tmpWireNum << "[" << (it.second[i].depth()) << ":0];\n";
           printBalanceCircuit(os, inputEls, tmpWireNum, name + "[" + std::to_string(i) + "]");
           ++tmpWireNum;
         }
@@ -320,7 +306,7 @@ void printSboxCircuitMinDNF(std::ifstream& is, std::ostream& os)
       for (size_t i = 0; i < values[ii].size(); ++i)
       {
         size_t tmpMaxDepth = 0;
-        for (const auto& el : values[ii][i].m_precompiledConjs)
+        for (const auto& el : values[ii][i].precompiledConjs())
         {
           if (el.first > tmpMaxDepth)
             tmpMaxDepth = el.first;
@@ -330,22 +316,22 @@ void printSboxCircuitMinDNF(std::ifstream& is, std::ostream& os)
         if (values[ii][i].depth() != (tmpMaxDepth + static_cast<size_t>(ceil(log2(values[ii][i].elementsNum())))))
         {
           std::map<size_t, std::vector<std::string>> inputEls;
-          for (size_t j = 0; j < values[ii][i].m_dim; ++j)
+          for (size_t j = 0; j < values[ii][i].dim(); ++j)
           {
-            if (values[ii][i].m_mainValues[j * 2 + 1] == true)
+            if (values[ii][i].mainValue(j, false) == true)
               inputEls[0].push_back("~a[" + std::to_string(j) + "]");
-            else if (values[ii][i].m_mainValues[j * 2] == true)
+            else if (values[ii][i].mainValue(j, true)  == true)
               inputEls[0].push_back("a[" + std::to_string(j) + "]");
           }
 
-          for (const auto& el : values[ii][i].m_precompiledConjs)
+          for (const auto& el : values[ii][i].precompiledConjs())
           {
             inputEls[el.first].push_back("commonWire" + std::to_string(el.first) + "[" + std::to_string(el.second) + "]");
           }
 
-          os << "wire [" << (values[ii][i].m_dim - 1) << ":0] tmpWire" << tmpWireNum << "[" << (values[ii][i].depth()) << ":0];\n";
+          os << "wire [" << (values[ii][i].dim() - 1) << ":0] tmpWire" << tmpWireNum << "[" << (values[ii][i].depth()) << ":0];\n";
           printBalanceCircuit(os, inputEls, tmpWireNum, name + "[" + std::to_string(balancedWireCnt) + "]");
-          values[ii][i].m_balancedWireNum = balancedWireCnt;
+          values[ii][i].setBalancedWireNum(balancedWireCnt);
           ++tmpWireNum;
           ++balancedWireCnt;
         }
