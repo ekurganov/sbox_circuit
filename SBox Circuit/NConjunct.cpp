@@ -174,7 +174,7 @@ void NConjunct::addPrecompiledConj(const std::pair<size_t, size_t> newConj)
   m_precompiledConjs.push_back(newConj);
 }
 
-void NConjunct::setBalancedWireNum(const size_t newWireNum)
+void NConjunct::setBalancedWireNum(const size_t newWireNum) const
 {
   m_balancedWireNum = newWireNum;
 }

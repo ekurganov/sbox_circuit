@@ -15,7 +15,7 @@ class NConjunct
 
     void setDim(const size_t newDim);
     void addPrecompiledConj(const std::pair<size_t, size_t> newConj);
-    void setBalancedWireNum(const size_t newWireNum);
+    void setBalancedWireNum(const size_t newWireNum) const;
     void setMainValue(const size_t index, bool val);
 
     const size_t dim() const;
@@ -24,7 +24,7 @@ class NConjunct
 
   private:
     size_t m_dim;
-    size_t m_balancedWireNum;
+    mutable size_t m_balancedWireNum;
     std::vector<bool> m_mainValues;
     std::vector<std::pair<size_t, size_t>> m_precompiledConjs;
 };

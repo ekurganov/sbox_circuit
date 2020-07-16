@@ -298,40 +298,40 @@ void printSboxCircuitMinDNF(std::ifstream& is, std::ostream& os)
     totalSize += it.size();
   os << "wire [" << (totalSize - 1) << ":0] " << name << ";\n";
   size_t balancedWireCnt = 1;
-  for (size_t ii = 0; ii < dim; ++ii)
+  for (const auto& it : values)
   {
-    if (!values[ii].empty())
+    if (!it.empty())
     {
 
-      for (size_t i = 0; i < values[ii].size(); ++i)
+      for (size_t i = 0; i < it.size(); ++i)
       {
         size_t tmpMaxDepth = 0;
-        for (const auto& el : values[ii][i].precompiledConjs())
+        for (const auto& el : it[i].precompiledConjs())
         {
           if (el.first > tmpMaxDepth)
             tmpMaxDepth = el.first;
         }
         if (tmpMaxDepth > 0)
           tmpMaxDepth = static_cast<size_t>(ceil(log2(tmpMaxDepth)));
-        if (values[ii][i].depth() != (tmpMaxDepth + static_cast<size_t>(ceil(log2(values[ii][i].elementsNum())))))
+        if (it[i].depth() != (tmpMaxDepth + static_cast<size_t>(ceil(log2(it[i].elementsNum())))))
         {
           std::map<size_t, std::vector<std::string>> inputEls;
-          for (size_t j = 0; j < values[ii][i].dim(); ++j)
+          for (size_t j = 0; j < it[i].dim(); ++j)
           {
-            if (values[ii][i].mainValue(j, false) == true)
+            if (it[i].mainValue(j, false) == true)
               inputEls[0].push_back("~a[" + std::to_string(j) + "]");
-            else if (values[ii][i].mainValue(j, true)  == true)
+            else if (it[i].mainValue(j, true)  == true)
               inputEls[0].push_back("a[" + std::to_string(j) + "]");
           }
 
-          for (const auto& el : values[ii][i].precompiledConjs())
+          for (const auto& el : it[i].precompiledConjs())
           {
             inputEls[el.first].push_back("commonWire" + std::to_string(el.first) + "[" + std::to_string(el.second) + "]");
           }
 
-          os << "wire [" << (values[ii][i].dim() - 1) << ":0] tmpWire" << tmpWireNum << "[" << (values[ii][i].depth()) << ":0];\n";
+          os << "wire [" << (it[i].dim() - 1) << ":0] tmpWire" << tmpWireNum << "[" << (it[i].depth()) << ":0];\n";
           printBalanceCircuit(os, inputEls, tmpWireNum, name + "[" + std::to_string(balancedWireCnt) + "]");
-          values[ii][i].setBalancedWireNum(balancedWireCnt);
+          it[i].setBalancedWireNum(balancedWireCnt);
           ++tmpWireNum;
           ++balancedWireCnt;
         }
