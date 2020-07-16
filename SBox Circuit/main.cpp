@@ -5,6 +5,7 @@
 #include "Profile.h"
 #include "Args.h"
 #include "SimpleMethods.h"
+#include "MinDNF.h"
 
 namespace 
 {
@@ -83,6 +84,10 @@ int main(int argc, char* argv[])
 		  {
 		    printSboxCircuitLupanov(inputData, out);
 		  }
+		}
+		else // minDNF
+		{
+		  printSboxCircuitMinDNF(dataIn, out);
 		}
 	}
 	catch (const std::exception& e) 

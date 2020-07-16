@@ -7,6 +7,8 @@ set(SOURCES
   SimpleMethods.cpp
   ShannonMethod.cpp
   LupanovMethod.cpp
+  MinDNF.cpp
+  NConjunct.cpp
 )
 
 
