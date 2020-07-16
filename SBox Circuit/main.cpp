@@ -60,9 +60,6 @@ int main(int argc, char* argv[])
       if (inputData.size() <= maxPrintThreshold)
         tree.postorderPrint();
 
-  //		std::cout << "Complexity = " << tree.complexity() << std::endl;
-      std::cout << "Depth = " << tree.depth() << std::endl;
-
       tree.printCircuit(out);
 		}
 		else if (args.meth_ != mMinDNF)
