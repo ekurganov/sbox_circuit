@@ -1,6 +1,8 @@
 `include "header.v"
 `include "sbox.v"
 `include "decoders.v"
+`include "phi.v"
+`include "all_functions.v"
 
 module sbox_tester ();
     reg clk;
