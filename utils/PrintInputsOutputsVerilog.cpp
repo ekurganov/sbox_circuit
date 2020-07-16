@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
   std::ofstream inputOs(inputFileName);
   std::ofstream outputOs(outputFileName);
 
-  for (size_t i = 0; i < (1 << n); ++i)
+  for (size_t i = 0; i < static_cast<size_t>(1 << n); ++i)
   {
     inputOs << std::setfill('0') << std::setw(indent) << std::hex << i << std::endl;
     outputOs << std::setfill('0') << std::setw(indent) << std::hex << inputData[i] << std::endl;

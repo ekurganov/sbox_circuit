@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
       usedNums.reserve((1 << dim));
       size_t cnt = 0;
 
-      while (cnt < (1 << dim))
+      while (cnt < static_cast<size_t>(1 << dim))
       {
         size_t num = dist(gen);
         if (usedNums.insert(num).second)
