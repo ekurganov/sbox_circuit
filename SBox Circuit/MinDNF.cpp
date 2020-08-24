@@ -225,69 +225,73 @@ void printSboxCircuitMinDNF(std::ifstream& is, std::ostream& os)
   size_t startDigitsNum = (1 << (static_cast<size_t>(ceil(log2(maxElements))))) >> 1;
 
   std::map<size_t, std::vector<NConjunct>> commonConjuncts;
+
+  std::map<size_t, std::vector<size_t>> sortedNumbers;
+  for (size_t i = 0; i < static_cast<size_t>(1 << dim); ++i)
+  {
+    sortedNumbers[onesNum(i, dim)].push_back(i);
+  }
+
   for (size_t ic = startDigitsNum; ic >= 2; --ic)
   {
     size_t commonWireNum = 0;
-    for (size_t jc = 2; jc < static_cast<size_t>(1 << dim); ++jc)
+    for (const auto& jc : sortedNumbers.at(ic))
     {
-      if (onesNum(jc, dim) == ic)
+      for (size_t kc = 0; kc < static_cast<size_t>(1 << ic); ++kc)
       {
-        for (size_t kc = 0; kc < static_cast<size_t>(1 << ic); ++kc)
+        NConjunct nc(dim);
+        nc.constructValue(jc, kc);
+        size_t cnt = 0;
+        std::vector<std::pair<size_t, size_t>> outputIndices;
+        std::vector<std::pair<size_t, size_t>> helpIndices;
+        for (size_t i = ic + 1; i <= startDigitsNum; ++i)
         {
-          NConjunct nc(dim);
-          nc.constructValue(jc, kc);
-          size_t cnt = 0;
-          std::vector<std::pair<size_t, size_t>> outputIndices;
-          std::vector<std::pair<size_t, size_t>> helpIndices;
-          for (size_t i = ic + 1; i <= startDigitsNum; ++i)
+          for (size_t j = 0; j < commonConjuncts[i].size(); ++j)
           {
-            for (size_t j = 0; j < commonConjuncts[i].size(); ++j)
+            if (commonConjuncts[i][j].containsConj(nc))
             {
-              if (commonConjuncts[i][j].containsConj(nc))
+              NConjunct checkConj = commonConjuncts[i][j];
+              checkConj.eraseConj(nc);
+              checkConj.addPrecompiledConj({ic, commonWireNum});
+              if (commonConjuncts[i][j].depth() == checkConj.depth())
               {
-                NConjunct checkConj = commonConjuncts[i][j];
-                checkConj.eraseConj(nc);
-                checkConj.addPrecompiledConj({ic, commonWireNum});
-                if (commonConjuncts[i][j].depth() == checkConj.depth())
-                {
-                  ++cnt;
-                  helpIndices.push_back({i, j});
-                }
+                ++cnt;
+                helpIndices.push_back({i, j});
               }
             }
           }
-          for (size_t i = 0; i < dim; ++i)
+        }
+        for (size_t i = 0; i < dim; ++i)
+        {
+          for (size_t j = 0; j < values[i].size(); ++j)
           {
-            for (size_t j = 0; j < values[i].size(); ++j)
+            if (values[i][j].containsConj(nc))
             {
-              if (values[i][j].containsConj(nc))
+              NConjunct checkConj = values[i][j];
+              checkConj.eraseConj(nc);
+              checkConj.addPrecompiledConj({ic, commonWireNum});
+              if (values[i][j].depth() == checkConj.depth())
               {
-                NConjunct checkConj = values[i][j];
-                checkConj.eraseConj(nc);
-                checkConj.addPrecompiledConj({ic, commonWireNum});
-                if (values[i][j].depth() == checkConj.depth())
-                {
-                  ++cnt;
-                  outputIndices.push_back({i, j});
-                }
+                ++cnt;
+                outputIndices.push_back({i, j});
               }
             }
           }
-          if (cnt > 1)
+        }
+        if (cnt > 1)
+        {
+          for (const auto& it : helpIndices)
           {
-            for (const auto& it : helpIndices)
-            {
-              commonConjuncts[it.first][it.second].eraseConj(nc);
-              commonConjuncts[it.first][it.second].addPrecompiledConj({ic, commonWireNum});
-            }
-            for (const auto& it : outputIndices)
-            {
-              values[it.first][it.second].eraseConj(nc);
-              values[it.first][it.second].addPrecompiledConj({ic, commonWireNum});
-            }
-            commonConjuncts[ic].push_back(nc);
-            ++commonWireNum;
+            commonConjuncts[it.first][it.second].eraseConj(nc);
+            commonConjuncts[it.first][it.second].addPrecompiledConj({ic, commonWireNum});
           }
+          for (const auto& it : outputIndices)
+          {
+            values[it.first][it.second].eraseConj(nc);
+            values[it.first][it.second].addPrecompiledConj({ic, commonWireNum});
+          }
+          commonConjuncts[ic].push_back(nc);
+          ++commonWireNum;
         }
       }
     }
