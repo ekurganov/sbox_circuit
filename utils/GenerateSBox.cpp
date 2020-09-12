@@ -2,7 +2,6 @@
 #include <vector>
 #include <random>
 #include <chrono>
-#include <unordered_set>
 
 //#include "Profile.h"
 
@@ -23,21 +22,20 @@ int main(int argc, char* argv[])
       dim = (argc == 1) ? defaultDim : std::stoi(argv[1]);
 
     std::mt19937_64 gen(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-    std::uniform_int_distribution<size_t> dist(0, (1 << dim) - 1);
+    size_t n = (1 << dim);
 
-    std::vector<size_t> pi ((1 << dim), (1 << dim) + 1);
+    std::vector<size_t> pi (n);
+    for (size_t i = 0; i < n; ++i)
+      pi[i] = i;
 
     {
 //      LOG_DURATION("building permutation");
-      std::unordered_set<size_t> usedNums;
-      usedNums.reserve((1 << dim));
-      size_t cnt = 0;
-
-      while (cnt < static_cast<size_t>(1 << dim))
+      for (size_t i = n - 1; i > 0; --i)
       {
+        std::uniform_int_distribution<size_t> dist(0, i);
+
         size_t num = dist(gen);
-        if (usedNums.insert(num).second)
-          pi[cnt++] = num;
+        std::swap(pi[num], pi[i]);
       }
     }
 
